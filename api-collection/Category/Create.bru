@@ -1,0 +1,18 @@
+meta {
+  name: Create
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{API_URL}}/category
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "Zapatos",
+    "description": "En esta cotegoría solo se guardarán zapatos"
+  }
+}

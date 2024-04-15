@@ -1,0 +1,57 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Role {
+  id   Int    @id @default(autoincrement())
+  name String
+  User User[]
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  password  String
+  roleId    Int
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  Role Role @relation(fields: [roleId], references: [id])
+}
+
+model Category {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  description String
+  createdAt   DateTime  @default(now())
+  deletedAt   DateTime?
+  Product     Product[]
+}
+
+model Product {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String
+  price       Float
+  stock       Int
+  categoryId  Int
+  createdAt   DateTime  @default(now())
+  deletedAt   DateTime?
+
+  category Category @relation(fields: [categoryId], references: [id])
+}
+
+model Configuration {
+  id          Int       @id @default(autoincrement())
+  code        String    @unique
+  description String
+  value       String
+  createdAt   DateTime  @default(now())
+  deletedAt   DateTime?
+}
