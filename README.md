@@ -39,7 +39,10 @@ pnpm run start:prod
 When the drizzle model has changed, run this command to make a new migration:
 
 ```
-pnpm db:generate
+# To DEV
+pnpm db-generate:dev
+# To PRD
+pnpm db-generate
 
 ```
 
@@ -48,5 +51,8 @@ pnpm db:generate
 When the migration has generated successfully, run this command to push the migration on the Turso database:
 
 ```
-pnpm db:push
+# To DEV
+pnpm db-push:dev
+# To PRD
+pnpm db-push
 ```
