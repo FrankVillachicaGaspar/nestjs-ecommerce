@@ -9,7 +9,7 @@ export class DrizzleService implements OnModuleInit {
   private tursoDatabaseUrl: string;
   private tursoAuthToken: string;
 
-  constructor(private configService: ConfigService) {
+  constructor(private readonly configService: ConfigService) {
     this.tursoDatabaseUrl = configService.get('tursoDatabaseUrl');
     this.tursoAuthToken = configService.get('tursoAuthToken');
   }
