@@ -32,30 +32,21 @@ pnpm run start:dev
 pnpm run start:prod
 ```
 
-## Prisma migrate
+## Drizzle migrate
 
-### Diff command
+### Command to generate a migration
 
-When the prisma model has changed, run this command to generate the sql file that will contain only the necessary sql statements that our databases needs to align to the new model:
-
-```
-pnpm prisma migrate diff --from-migrations prisma/migrations --to-schema-datamodel prisma/schema.prisma --script prisma/diff.sql
+When the drizzle model has changed, run this command to make a new migration:
 
 ```
-
-### Update Turso database
-
-When the diff sql file has been generated, run this command to apply the new changes to the database structure:
+pnpm db:generate
 
 ```
-# Check tha Turso documentation for install the CLI
-Turso db shell ecommerce < prisma/diff.sql
-```
 
-### Migrate change to dev database
+### Push migration to Turso database
 
-To migrate the lasted change of the models to the dev database, run this command:
+When the migration has generated successfully, run this command to push the migration on the Turso database:
 
 ```
-pnpm prisma migrate dev
+pnpm db:push
 ```

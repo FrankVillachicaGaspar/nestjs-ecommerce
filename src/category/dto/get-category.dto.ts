@@ -1,4 +1,4 @@
-import { Expose, Transform } from 'class-transformer';
+import { Expose } from 'class-transformer';
 export class GetCategoryDto {
   @Expose()
   id: number;
@@ -7,9 +7,11 @@ export class GetCategoryDto {
   name: string;
 
   @Expose()
-  description: string;
+  desc: string;
 
   @Expose()
-  @Transform(({ value }: { value: Date }) => value.toLocaleString())
-  createdAt: Date;
+  createdAt: string;
+
+  @Expose({})
+  modifiedAt?: string;
 }
