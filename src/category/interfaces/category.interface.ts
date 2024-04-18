@@ -3,6 +3,6 @@ export interface Category {
   name: string;
   desc: string;
   createdAt: string;
-  modifiedAt: string;
-  deletedAt: string;
+  modifiedAt?: string;
+  deletedAt?: string;
 }

@@ -3,6 +3,7 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  OnModuleInit,
 } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
@@ -12,18 +13,25 @@ import { category } from 'drizzle/schema';
 import { eq } from 'drizzle-orm';
 import { Category } from './interfaces/category.interface';
 import { DtoConverter } from 'src/common/providers/dto-converter.provider';
+import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
+import { LibSQLDatabase } from 'drizzle-orm/libsql';
 
 @Injectable()
-export class CategoryService {
+export class CategoryService implements OnModuleInit {
+  private db: BetterSQLite3Database | LibSQLDatabase;
+
   constructor(
-    private readonly drizzle: DrizzleService,
+    private readonly drizzleService: DrizzleService,
     private readonly dtoConverter: DtoConverter,
   ) {}
 
+  onModuleInit() {
+    this.db = this.drizzleService.getClient();
+  }
+
   async create(createCategoryDto: CreateCategoryDto): Promise<GetCategoryDto> {
     try {
-      const categoryDb = await this.drizzle
-        .getClient()
+      const categoryDb = await this.db
         .insert(category)
         .values({
           name: createCategoryDto.name,
@@ -41,11 +49,7 @@ export class CategoryService {
 
   async findAll() {
     try {
-      const categoriesDb = await this.drizzle
-        .getClient()
-        .select()
-        .from(category)
-        .all();
+      const categoriesDb = await this.db.select().from(category).all();
 
       const categoriesDto = categoriesDb.map((category) =>
         this.dtoConverter.plainToDto(GetCategoryDto, category),
@@ -60,8 +64,7 @@ export class CategoryService {
   async findOneById(id: number) {
     let categoryDb: Category;
     try {
-      categoryDb = await this.drizzle
-        .getClient()
+      categoryDb = await this.db
         .select()
         .from(category)
         .where(eq(category.id, id))
@@ -71,7 +74,6 @@ export class CategoryService {
     }
 
     if (!categoryDb) {
-      console.log('Entro al error');
       throw new NotFoundException(`Category with id ${id} not found`);
     }
 
@@ -81,8 +83,7 @@ export class CategoryService {
   async update(id: number, updateCategoryDto: UpdateCategoryDto) {
     let categoryDb: Category;
     try {
-      categoryDb = await this.drizzle
-        .getClient()
+      categoryDb = await this.db
         .update(category)
         .set({
           ...updateCategoryDto,
@@ -104,8 +105,7 @@ export class CategoryService {
   async remove(id: number) {
     let categoryDb: Category;
     try {
-      categoryDb = await this.drizzle
-        .getClient()
+      categoryDb = await this.db
         .delete(category)
         .where(eq(category.id, id))
         .returning()
@@ -119,8 +119,6 @@ export class CategoryService {
   }
 
   private handleErrors(error: any) {
-    console.log(error);
-
     if (error.message.includes('UNIQUE constraint'))
       throw new BadRequestException(`the category already exist`);
 

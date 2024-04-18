@@ -6,6 +6,7 @@ import { EnvConfiguration } from 'config/env.config';
 import { JoiValidationSchema } from 'config/joi.validations';
 import { CategoryModule } from './category/category.module';
 import { DrizzleModule } from './drizzle/drizzle.module';
+import { SeedModule } from './seed/seed.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { DrizzleModule } from './drizzle/drizzle.module';
     UserModule,
     CategoryModule,
     DrizzleModule,
+    SeedModule,
   ],
 })
 export class AppModule {}
