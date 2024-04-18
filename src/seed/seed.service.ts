@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   OnModuleInit,
@@ -10,18 +11,31 @@ import { categoriesDataMock } from './mock/category.mock';
 import { usersDataMock } from './mock/users.mock';
 import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { LibSQLDatabase } from 'drizzle-orm/libsql';
+import { ConfigService } from '@nestjs/config';
+import constantsUtils from 'src/common/utils/constants.utils';
 
 @Injectable()
 export class SeedService implements OnModuleInit {
   private db: BetterSQLite3Database | LibSQLDatabase;
+  private readonly environment: string;
 
-  constructor(private readonly drizzleService: DrizzleService) {}
+  constructor(
+    private readonly drizzleService: DrizzleService,
+    private readonly configService: ConfigService,
+  ) {
+    this.environment = configService.get('environment');
+  }
 
   onModuleInit() {
     this.db = this.drizzleService.getClient();
   }
 
   async populate() {
+    if (this.environment !== constantsUtils.DEVELOPMENT)
+      throw new BadRequestException(
+        `Seed failed. The seed can only executed in development mode.`,
+      );
+
     try {
       await this.db.delete(role);
       await this.db.delete(category);

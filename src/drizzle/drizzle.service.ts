@@ -7,7 +7,7 @@ import {
   BetterSQLite3Database,
   drizzle as localDrizzle,
 } from 'drizzle-orm/better-sqlite3';
-import { DEVELOPMENT } from 'src/common/utils/constants.utils';
+import constantsUtils from 'src/common/utils/constants.utils';
 
 @Injectable()
 export class DrizzleService implements OnModuleInit {
@@ -39,7 +39,7 @@ export class DrizzleService implements OnModuleInit {
   getClient() {
     if (!this.db) throw new Error('database connection is missing');
 
-    if (this.environment === DEVELOPMENT) return this.localDb;
+    if (this.environment === constantsUtils.DEVELOPMENT) return this.localDb;
 
     return this.db;
   }

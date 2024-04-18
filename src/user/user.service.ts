@@ -1,37 +1,46 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
-import { DrizzleService } from 'src/drizzle/drizzle.service';
+import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { User } from './interfaces/user.interface';
-import { user } from 'drizzle/schema';
-import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
-import { LibSQLDatabase } from 'drizzle-orm/libsql';
+import { DtoConverter } from 'src/common/providers/dto-converter.provider';
+import { GetUserDto } from './dto/get-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import DrizzleUserRepository from './repositories/drizzle-user.repository';
 
 @Injectable()
-export class UserService implements OnModuleInit {
-  private db: BetterSQLite3Database | LibSQLDatabase;
+export class UserService {
+  constructor(
+    private readonly userRepository: DrizzleUserRepository,
+    private readonly dtoConverter: DtoConverter,
+  ) {}
 
-  constructor(private readonly drizzleService: DrizzleService) {}
+  async create(createUserDto: CreateUserDto): Promise<GetUserDto> {
+    const user = await this.userRepository.create(createUserDto);
 
-  onModuleInit() {
-    this.db = this.drizzleService.getClient();
+    return this.dtoConverter.plainToDto(GetUserDto, user);
   }
 
-  async create(createUserDto: CreateUserDto) {
-    let userDb: User;
-    try {
-      userDb = await this.db
-        .insert(user)
-        .values({
-          ...createUserDto,
-          createdAt: new Date().toISOString(),
-        })
-        .returning()
-        .get();
-    } catch (error) {}
-    return userDb;
+  async findOne(id: number): Promise<GetUserDto> {
+    const user = await this.userRepository.findById(id);
+
+    return this.dtoConverter.plainToDto(GetUserDto, user);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async getAll(): Promise<GetUserDto[]> {
+    const userList = await this.userRepository.findAll();
+
+    const userDtoList = userList.map((user) =>
+      this.dtoConverter.plainToDto(GetUserDto, user),
+    );
+
+    return userDtoList;
+  }
+
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<GetUserDto> {
+    const user = await this.userRepository.update(id, updateUserDto);
+
+    return this.dtoConverter.plainToDto(GetUserDto, user);
+  }
+
+  async remove(id: number): Promise<void> {
+    await this.userRepository.remove(id);
   }
 }
