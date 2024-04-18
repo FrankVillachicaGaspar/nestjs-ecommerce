@@ -10,8 +10,9 @@ An e-commerce api developed with Nest JS.
 
 ## Stack
 
-1. NestJs
-2. Prisma ORM
+1. NestJs ([Read the doc](https://docs.nestjs.com/))
+2. Drizzle ORM ([Read the doc](https://orm.drizzle.team/docs/overview))
+3. Turso database ([Read the doc](https://docs.turso.tech/introduction))
 
 ## Installation
 
@@ -57,4 +58,16 @@ pnpm db-push:dev
 
 # To PRD
 pnpm db-push
+```
+
+### Run Drizzle studio
+
+If you want run drizzle studio to management your database, run this command.
+
+```
+# To DEV
+pnpm db-studio:dev
+
+# To PRD
+pnpm db-studio
 ```
