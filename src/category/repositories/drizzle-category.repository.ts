@@ -84,7 +84,7 @@ export class DrizzleCategoryRepository
     try {
       categoryDb = await this.db
         .update(category)
-        .set({ ...updateCategoryDto })
+        .set({ ...updateCategoryDto, modifiedAt: new Date().toISOString() })
         .where(eq(category.id, id))
         .returning()
         .get();

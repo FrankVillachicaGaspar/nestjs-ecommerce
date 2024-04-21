@@ -7,6 +7,7 @@ import { JoiValidationSchema } from 'config/joi.validations';
 import { CategoryModule } from './category/category.module';
 import { DrizzleModule } from './drizzle/drizzle.module';
 import { SeedModule } from './seed/seed.module';
+import { ProductModule } from './product/product.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { SeedModule } from './seed/seed.module';
     CategoryModule,
     DrizzleModule,
     SeedModule,
+    ProductModule,
   ],
 })
 export class AppModule {}

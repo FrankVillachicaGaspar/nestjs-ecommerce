@@ -76,7 +76,7 @@ export default class DrizzleUserRepository
     try {
       userDb = await this.db
         .update(user)
-        .set({ ...updateUserDto })
+        .set({ ...updateUserDto, modifiedAt: new Date().toISOString() })
         .where(eq(user.id, id))
         .returning()
         .get();
