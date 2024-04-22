@@ -1,0 +1,17 @@
+meta {
+  name: Update
+  type: http
+  seq: 3
+}
+
+patch {
+  url: {{API_URL}}/product/31
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "stock": 100
+  }
+}

@@ -118,10 +118,10 @@ export class DrizzleCategoryRepository
   }
 
   handleErrors(error: any) {
-    this.logger.fatal(error);
-
     if (error.message.includes('UNIQUE constraint'))
       throw new BadRequestException(`the category already exist`);
+
+    this.logger.fatal(error);
 
     throw new InternalServerErrorException(error);
   }

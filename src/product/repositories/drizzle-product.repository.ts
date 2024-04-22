@@ -105,16 +105,18 @@ export class DrizzleProductRepository
     }
     if (!productDb)
       throw new BadRequestException(
-        `Delete failed!. The category with id ${id} not found`,
+        `Delete failed!. The product with id ${id} not found`,
       );
   }
 
   handleErrors(error: any) {
-    this.logger.fatal(error);
+    if (error.code.includes('SQLITE_CONSTRAINT_FOREIGNKEY'))
+      throw new BadRequestException(`The category not found`);
 
     if (error.message.includes('UNIQUE constraint'))
-      throw new BadRequestException(`the category already exist`);
+      throw new BadRequestException(`The product already exist`);
 
+    this.logger.fatal(error);
     throw new InternalServerErrorException(error);
   }
 }
