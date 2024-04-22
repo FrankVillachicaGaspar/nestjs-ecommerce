@@ -71,3 +71,6 @@ pnpm db-studio:dev
 # To PRD
 pnpm db-studio
 ```
+
+### Open api collection in Bruno api rest client
+  You can open the request collection in [Bruno](https://www.usebruno.com/). The folder that you should import is "api-collection"; within this folder, you can find all the request made to API.
