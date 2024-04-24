@@ -1,0 +1,18 @@
+meta {
+  name: Create
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{API_URL}}/setting
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "For delete",
+    "desc": "Esta categoría fue creada para eliminarse."
+  }
+}

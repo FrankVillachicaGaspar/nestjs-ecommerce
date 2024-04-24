@@ -1,0 +1,17 @@
+meta {
+  name: Update
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{API_URL}}/setting/12
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "desc": "Esta categoría es para guardar polos de todas las marcas."
+  }
+}

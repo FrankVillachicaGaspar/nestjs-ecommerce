@@ -8,6 +8,7 @@ import { CategoryModule } from './category/category.module';
 import { DrizzleModule } from './drizzle/drizzle.module';
 import { SeedModule } from './seed/seed.module';
 import { ProductModule } from './product/product.module';
+import { SettingsModule } from './setting/setting.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { ProductModule } from './product/product.module';
     DrizzleModule,
     SeedModule,
     ProductModule,
+    SettingsModule,
   ],
 })
 export class AppModule {}
