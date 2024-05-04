@@ -1,8 +1,5 @@
-interface Role {
-  id: number;
-  name: string;
-  createdAt: string;
-}
+import { Role } from '../interfaces/role.interface';
+
 export const rolesDataMock: Role[] = [
   {
     id: 1,
