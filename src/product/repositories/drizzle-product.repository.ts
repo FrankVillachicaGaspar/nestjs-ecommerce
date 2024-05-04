@@ -26,7 +26,7 @@ export class DrizzleProductRepository
   constructor(private readonly drizzleService: DrizzleService) {}
 
   onModuleInit() {
-    this.db = this.drizzleService.getClient();
+    this.db = this.drizzleService.getClient(DrizzleProductRepository.name);
   }
 
   async create(createProductDto: CreateProductDto): Promise<Product> {

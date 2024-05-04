@@ -26,7 +26,7 @@ export class DrizzleCategoryRepository
   constructor(private readonly drizzleService: DrizzleService) {}
 
   onModuleInit() {
-    this.db = this.drizzleService.getClient();
+    this.db = this.drizzleService.getClient(DrizzleCategoryRepository.name);
   }
 
   async create(createCategoryDto: CreateCategoryDto): Promise<Category> {

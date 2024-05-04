@@ -26,7 +26,7 @@ export class DrizzleSettingRepository
   constructor(private drizzleService: DrizzleService) {}
 
   onModuleInit() {
-    this.db = this.drizzleService.getClient();
+    this.db = this.drizzleService.getClient(DrizzleSettingRepository.name);
   }
 
   async create(createSettingDto: CreateSettingDto): Promise<Setting> {

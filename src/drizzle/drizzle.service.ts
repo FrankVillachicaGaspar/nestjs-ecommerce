@@ -1,5 +1,5 @@
 import { createClient } from '@libsql/client';
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { LibSQLDatabase, drizzle } from 'drizzle-orm/libsql';
 import * as Database from 'better-sqlite3';
@@ -17,6 +17,7 @@ export class DrizzleService implements OnModuleInit {
   private localDatabaseUrl: string;
   private environment: string;
   private localDb: BetterSQLite3Database;
+  private logger = new Logger(DrizzleService.name);
 
   constructor(private readonly configService: ConfigService) {
     this.tursoDatabaseUrl = configService.get('tursoDatabaseUrl');
@@ -26,21 +27,37 @@ export class DrizzleService implements OnModuleInit {
   }
 
   onModuleInit() {
-    const sqlite = new Database(this.localDatabaseUrl);
-    this.localDb = localDrizzle(sqlite);
+    if (this.environment === constantsUtils.PRODUCTION) {
+      const client = createClient({
+        url: this.tursoDatabaseUrl,
+        authToken: this.tursoAuthToken,
+      });
 
-    const client = createClient({
-      url: this.tursoDatabaseUrl,
-      authToken: this.tursoAuthToken,
-    });
-    this.db = drizzle(client);
+      this.db = drizzle(client);
+    } else {
+      const sqlite = new Database(this.localDatabaseUrl);
+
+      this.localDb = localDrizzle(sqlite);
+    }
   }
 
-  getClient() {
+  /**
+   * Return the database connection.
+   * - The className parameter is the class name when this method is calling.
+   *
+   * Example: getClient(ExampleRepository.name)
+   * @param className string
+   * @returns BetterSQLite3Database | LibSQLDatabase
+   */
+  getClient(className: string) {
+    if (this.environment === constantsUtils.DEVELOPMENT) {
+      this.logger.log(
+        `Local database is successfully connected in ${className}`,
+      );
+      return this.localDb;
+    }
+
     if (!this.db) throw new Error('database connection is missing');
-
-    if (this.environment === constantsUtils.DEVELOPMENT) return this.localDb;
-
     return this.db;
   }
 }

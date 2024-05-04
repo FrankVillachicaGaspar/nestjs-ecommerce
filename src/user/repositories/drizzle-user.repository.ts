@@ -26,7 +26,7 @@ export default class DrizzleUserRepository
   constructor(private readonly drizzleService: DrizzleService) {}
 
   onModuleInit() {
-    this.db = this.drizzleService.getClient();
+    this.db = this.drizzleService.getClient(DrizzleUserRepository.name);
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
