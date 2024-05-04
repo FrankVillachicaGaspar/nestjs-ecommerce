@@ -13,7 +13,13 @@ const adminUser: User = {
   createdAt: new Date().toISOString(),
 };
 
-const generateUsers = (quantity: number): User[] => {
+/**
+ * Generate mock users using faker-js
+ * - Recommended max quantity: 30
+ * @param quantity number
+ * @returns User[]
+ */
+export const generateUsers = (quantity: number): User[] => {
   const userList = new Array<User>();
 
   for (let index = 0; index < quantity; index++) {
@@ -32,5 +38,3 @@ const generateUsers = (quantity: number): User[] => {
   userList.unshift({ id: userList.length, ...adminUser });
   return userList;
 };
-
-export const usersDataMock: User[] = generateUsers(30);

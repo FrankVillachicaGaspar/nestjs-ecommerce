@@ -4,11 +4,11 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { rolesDataMock } from './mock/role.mock';
-import { categoriesDataMock } from './mock/category.mock';
-import { usersDataMock } from './mock/users.mock';
+import { generateCategories } from './mock/category.mock';
+import { generateUsers } from './mock/users.mock';
 import { ConfigService } from '@nestjs/config';
 import constantsUtils from 'src/common/utils/constants.utils';
-import { productsDataMock } from './mock/product.mock';
+import { generateProducts } from './mock/product.mock';
 import { DrizzleSeedRepository } from './repositories/drizzle-seed.repository';
 import { settingDataMock } from './mock/setting.mock';
 
@@ -31,11 +31,17 @@ export class SeedService {
 
     try {
       await this.seedRepository.cleanDatabaseRecords();
+
+      const users = generateUsers(30);
+      const categories = generateCategories(24);
+      const products = generateProducts(30);
+
       await this.seedRepository.populateRoles(rolesDataMock);
-      await this.seedRepository.populateUsers(usersDataMock);
-      await this.seedRepository.populateCategories(categoriesDataMock);
-      await this.seedRepository.populateProducts(productsDataMock);
+      await this.seedRepository.populateUsers(users);
+      await this.seedRepository.populateCategories(categories);
+      await this.seedRepository.populateProducts(products);
       await this.seedRepository.populateSettings(settingDataMock);
+
       return { message: 'seed executed successfully' };
     } catch (error) {
       console.log(error);

@@ -1,7 +1,13 @@
 import { faker } from '@faker-js/faker';
 import { Category } from 'src/category/interfaces/category.interface';
 
-const generateCategories = (quantity: number): Category[] => {
+/**
+ * Generate a mock categories using faker-js.
+ * - Recommended max quantity: 24.
+ * @param quantity number
+ * @returns Category[]
+ */
+export const generateCategories = (quantity: number): Category[] => {
   const categoryList = new Array<Category>();
   for (let index = 0; index < quantity; index++) {
     const category = {
@@ -11,9 +17,7 @@ const generateCategories = (quantity: number): Category[] => {
       createdAt: faker.date.anytime().toISOString(),
     };
 
-    const existCategory = categoryList.find(
-      (category) => category.name == category.name,
-    );
+    const existCategory = categoryList.find((c) => c.name == category.name);
 
     if (existCategory) {
       index--;
@@ -23,5 +27,3 @@ const generateCategories = (quantity: number): Category[] => {
   }
   return categoryList;
 };
-
-export const categoriesDataMock: Category[] = generateCategories(30);

@@ -12,7 +12,7 @@ import { category, product, role, setting, user } from 'drizzle/schema';
 
 @Injectable()
 export class DrizzleSeedRepository implements SeedRepository, OnModuleInit {
-  private db: LibSQLDatabase | BetterSQLite3Database;
+  private db: BetterSQLite3Database | LibSQLDatabase;
 
   constructor(private readonly drizzleService: DrizzleService) {}
 
