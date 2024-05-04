@@ -17,7 +17,7 @@ export class DrizzleSeedRepository implements SeedRepository, OnModuleInit {
   constructor(private readonly drizzleService: DrizzleService) {}
 
   onModuleInit() {
-    this.db = this.drizzleService.getClient();
+    this.db = this.drizzleService.getClient(DrizzleSeedRepository.name);
   }
 
   async cleanDatabaseRecords(): Promise<void> {
