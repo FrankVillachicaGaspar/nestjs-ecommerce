@@ -20,8 +20,8 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "db-generate": "drizzle-kit generate:sqlite",
     "db-push": "drizzle-kit push:sqlite",
-    "db-generate:dev": "drizzle-kit generate:sqlite drizzle.config.dev.ts",
-    "db-push:dev": "drizzle-kit push:sqlite drizzle.config.dev.ts",
+    "db-generate:dev": "drizzle-kit generate:sqlite --config drizzle.config.dev.ts",
+    "db-push:dev": "drizzle-kit push:sqlite --config drizzle.config.dev.ts",
     "db-studio": "drizzle-kit studio",
     "db-studio:dev": "drizzle-kit studio --config drizzle.config.dev.ts"
   },
