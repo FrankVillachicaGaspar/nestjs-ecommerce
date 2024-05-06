@@ -7,10 +7,12 @@ import {
   Param,
   Delete,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 @Controller('category')
 export class CategoryController {
@@ -22,8 +24,8 @@ export class CategoryController {
   }
 
   @Get()
-  async findAll() {
-    return await this.categoryService.findAll();
+  async findAll(@Query() paginationQuery: PaginationQueryDto) {
+    return await this.categoryService.findAll(paginationQuery);
   }
 
   @Get(':id')

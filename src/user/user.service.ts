@@ -4,6 +4,8 @@ import { DtoConverter } from 'src/common/providers/dto-converter.provider';
 import { GetUserDto } from './dto/get-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import DrizzleUserRepository from './repositories/drizzle-user.repository';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { FindAllResponse } from 'src/common/interfaces/find-all-response.dto';
 
 @Injectable()
 export class UserService {
@@ -24,14 +26,19 @@ export class UserService {
     return this.dtoConverter.plainToDto(GetUserDto, user);
   }
 
-  async getAll(): Promise<GetUserDto[]> {
-    const userList = await this.userRepository.findAll();
+  async getAll(
+    paginationQueryDto: PaginationQueryDto,
+  ): Promise<FindAllResponse<GetUserDto[]>> {
+    const result = await this.userRepository.findAll(paginationQueryDto);
 
-    const userDtoList = userList.map((user) =>
+    const userDtoList = result.data.map((user) =>
       this.dtoConverter.plainToDto(GetUserDto, user),
     );
 
-    return userDtoList;
+    return {
+      data: userDtoList,
+      pagination: result.pagination,
+    };
   }
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<GetUserDto> {

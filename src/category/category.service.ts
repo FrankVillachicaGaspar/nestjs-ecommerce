@@ -4,6 +4,8 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 import { GetCategoryDto } from './dto/get-category.dto';
 import { DtoConverter } from 'src/common/providers/dto-converter.provider';
 import { DrizzleCategoryRepository } from './repositories/drizzle-category.repository';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { FindAllResponse } from 'src/common/interfaces/find-all-response.dto';
 
 @Injectable()
 export class CategoryService {
@@ -18,23 +20,31 @@ export class CategoryService {
     return this.dtoConverter.plainToDto(GetCategoryDto, category);
   }
 
-  async findAll() {
-    const categoryList = await this.categoryRepository.findAll();
+  async findAll(
+    paginationQuery: PaginationQueryDto,
+  ): Promise<FindAllResponse<GetCategoryDto[]>> {
+    const result = await this.categoryRepository.findAll(paginationQuery);
 
-    const categoryDtoList = categoryList.map((category) =>
+    const categoryDtoList = result.data.map((category) =>
       this.dtoConverter.plainToDto(GetCategoryDto, category),
     );
 
-    return categoryDtoList;
+    return {
+      data: categoryDtoList,
+      pagination: result.pagination,
+    };
   }
 
-  async findOneById(id: number) {
+  async findOneById(id: number): Promise<GetCategoryDto> {
     const category = await this.categoryRepository.findById(id);
 
     return this.dtoConverter.plainToDto(GetCategoryDto, category);
   }
 
-  async update(id: number, updateCategoryDto: UpdateCategoryDto) {
+  async update(
+    id: number,
+    updateCategoryDto: UpdateCategoryDto,
+  ): Promise<GetCategoryDto> {
     const category = await this.categoryRepository.update(
       id,
       updateCategoryDto,
