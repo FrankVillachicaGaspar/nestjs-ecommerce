@@ -10,23 +10,32 @@ import { UserRepositoryAdapter } from '../interfaces/user-repository-adapter.int
 import { CreateUserDto } from '../dto/create-user.dto';
 import { User } from '../interfaces/user.interface';
 import { DrizzleService } from 'src/drizzle/drizzle.service';
-import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { LibSQLDatabase } from 'drizzle-orm/libsql';
 import { user } from 'drizzle/schema';
-import { eq } from 'drizzle-orm';
+import { count, eq } from 'drizzle-orm';
 import { UpdateUserDto } from '../dto/update-user.dto';
+import * as schema from 'drizzle/schema';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { FindAllResponse } from 'src/common/interfaces/find-all-response.dto';
+import {
+  calculateOffset,
+  calculatePaginationData,
+} from 'src/common/utils/pagination.utils';
+import { handleDrizzleErrors } from 'src/common/errors/drizzle.error';
 
 @Injectable()
 export default class DrizzleUserRepository
   implements UserRepositoryAdapter, OnModuleInit
 {
   private readonly logger = new Logger(DrizzleUserRepository.name);
-  private db: BetterSQLite3Database | LibSQLDatabase;
+  private db: LibSQLDatabase<typeof schema>;
 
   constructor(private readonly drizzleService: DrizzleService) {}
 
   onModuleInit() {
-    this.db = this.drizzleService.getClient(DrizzleUserRepository.name);
+    this.db = this.drizzleService.getClient(
+      DrizzleUserRepository.name,
+    ) as LibSQLDatabase<typeof schema>;
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -41,19 +50,37 @@ export default class DrizzleUserRepository
         .returning()
         .get();
     } catch (error) {
-      this.handleErrors(error);
+      handleDrizzleErrors(error, 'user', this.logger);
     }
     return userDb;
   }
 
-  async findAll(): Promise<User[]> {
-    let userListDb: User[];
+  async findAll({
+    limit,
+    page,
+  }: PaginationQueryDto): Promise<FindAllResponse<User[]>> {
     try {
-      userListDb = await this.db.select().from(user).all();
+      const { totalItems } = await this.db
+        .select({ totalItems: count() })
+        .from(user)
+        .get();
+
+      const pagination = calculatePaginationData(totalItems, limit, page);
+
+      const userListDb = await this.db
+        .select()
+        .from(user)
+        .limit(limit)
+        .offset(calculateOffset(limit, page))
+        .all();
+
+      return {
+        data: userListDb,
+        pagination,
+      };
     } catch (error) {
-      this.handleErrors(error);
+      handleDrizzleErrors(error, 'user', this.logger);
     }
-    return userListDb;
   }
 
   async findById(id: number): Promise<User> {
@@ -62,7 +89,7 @@ export default class DrizzleUserRepository
     try {
       userDb = await this.db.select().from(user).where(eq(user.id, id)).get();
     } catch (error) {
-      this.handleErrors(error);
+      handleDrizzleErrors(error, 'user', this.logger);
     }
 
     if (!userDb) throw new NotFoundException(`User with id ${id} not found.`);
@@ -81,7 +108,7 @@ export default class DrizzleUserRepository
         .returning()
         .get();
     } catch (error) {
-      this.handleErrors(error);
+      handleDrizzleErrors(error, 'user', this.logger);
     }
 
     if (!userDb)
@@ -101,20 +128,11 @@ export default class DrizzleUserRepository
         .returning()
         .get();
     } catch (error) {
-      this.handleErrors(error);
+      handleDrizzleErrors(error, 'user', this.logger);
     }
     if (!userDb)
       throw new BadRequestException(
         `Delete failed!. The user with id ${id} not found.`,
       );
-  }
-
-  handleErrors(error: any) {
-    if (error.message.includes('UNIQUE constraint'))
-      throw new BadRequestException(`the user already exist`);
-
-    this.logger.fatal(error);
-
-    throw new InternalServerErrorException(error);
   }
 }

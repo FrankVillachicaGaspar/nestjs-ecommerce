@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   Injectable,
-  InternalServerErrorException,
   Logger,
   NotFoundException,
   OnModuleInit,
@@ -11,22 +10,31 @@ import { CreateProductDto } from '../dto/create-product.dto';
 import { UpdateProductDto } from '../dto/update-product.dto';
 import { Product } from '../interfaces/product.interface';
 import { DrizzleService } from 'src/drizzle/drizzle.service';
-import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
-import { LibSQLDatabase } from 'drizzle-orm/libsql';
 import { product } from 'drizzle/schema';
-import { eq } from 'drizzle-orm';
+import { count, eq, sql } from 'drizzle-orm';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import * as schema from 'drizzle/schema';
+import { LibSQLDatabase } from 'drizzle-orm/libsql';
+import { FindAllResponse } from 'src/common/interfaces/find-all-response.dto';
+import {
+  calculateOffset,
+  calculatePaginationData,
+} from 'src/common/utils/pagination.utils';
+import { handleDrizzleErrors } from 'src/common/errors/drizzle.error';
 
 @Injectable()
 export class DrizzleProductRepository
   implements ProductRepository, OnModuleInit
 {
   private readonly logger = new Logger(DrizzleProductRepository.name);
-  private db: BetterSQLite3Database | LibSQLDatabase;
+  private db: LibSQLDatabase<typeof schema>;
 
   constructor(private readonly drizzleService: DrizzleService) {}
 
   onModuleInit() {
-    this.db = this.drizzleService.getClient(DrizzleProductRepository.name);
+    this.db = this.drizzleService.getClient(
+      DrizzleProductRepository.name,
+    ) as LibSQLDatabase<typeof schema>;
   }
 
   async create(createProductDto: CreateProductDto): Promise<Product> {
@@ -38,7 +46,7 @@ export class DrizzleProductRepository
         .returning()
         .get();
     } catch (error) {
-      this.handleErrors(error);
+      handleDrizzleErrors(error, 'product', this.logger);
     }
     return productDb;
   }
@@ -52,7 +60,7 @@ export class DrizzleProductRepository
         .where(eq(product.id, id))
         .get();
     } catch (error) {
-      this.handleErrors(error);
+      handleDrizzleErrors(error, 'product', this.logger);
     }
     if (!productDb)
       throw new NotFoundException(`Product with id ${id} not found`);
@@ -60,14 +68,32 @@ export class DrizzleProductRepository
     return productDb;
   }
 
-  async findAll(): Promise<Product[]> {
-    let productListDb: Product[];
+  async findAll({
+    limit,
+    page,
+  }: PaginationQueryDto): Promise<FindAllResponse<Product[]>> {
     try {
-      productListDb = await this.db.select().from(product).all();
+      const { totalItems } = await this.db
+        .select({ totalItems: count() })
+        .from(product)
+        .get();
+
+      const pagination = calculatePaginationData(totalItems, limit, page);
+
+      const products = await this.db
+        .select()
+        .from(product)
+        .limit(limit)
+        .offset(calculateOffset(limit, page))
+        .all();
+
+      return {
+        data: products,
+        pagination,
+      };
     } catch (error) {
-      this.handleErrors(error);
+      handleDrizzleErrors(error, 'product', this.logger);
     }
-    return productListDb;
   }
 
   async update(
@@ -83,7 +109,7 @@ export class DrizzleProductRepository
         .returning()
         .get();
     } catch (error) {
-      this.handleErrors(error);
+      handleDrizzleErrors(error, 'product', this.logger);
     }
     if (!productDb)
       throw new BadRequestException(
@@ -101,22 +127,11 @@ export class DrizzleProductRepository
         .returning()
         .get();
     } catch (error) {
-      this.handleErrors(error);
+      handleDrizzleErrors(error, 'product', this.logger);
     }
     if (!productDb)
       throw new BadRequestException(
         `Delete failed!. The product with id ${id} not found`,
       );
-  }
-
-  handleErrors(error: any) {
-    if (error.code.includes('SQLITE_CONSTRAINT_FOREIGNKEY'))
-      throw new BadRequestException(`The category not found`);
-
-    if (error.message.includes('UNIQUE constraint'))
-      throw new BadRequestException(`The product already exist`);
-
-    this.logger.fatal(error);
-    throw new InternalServerErrorException(error);
   }
 }

@@ -9,24 +9,33 @@ import {
 import { CreateCategoryDto } from '../dto/create-category.dto';
 import { UpdateCategoryDto } from '../dto/update-category.dto';
 import { CategoryRepository } from '../interfaces/category-repository-adapter.interface';
-import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { LibSQLDatabase } from 'drizzle-orm/libsql';
 import { DrizzleService } from 'src/drizzle/drizzle.service';
 import { Category } from '../interfaces/category.interface';
 import { category } from 'drizzle/schema';
-import { eq } from 'drizzle-orm';
+import { count, eq } from 'drizzle-orm';
+import * as schema from 'drizzle/schema';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import {
+  calculateOffset,
+  calculatePaginationData,
+} from 'src/common/utils/pagination.utils';
+import { FindAllResponse } from 'src/common/interfaces/find-all-response.dto';
+import { handleDrizzleErrors } from 'src/common/errors/drizzle.error';
 
 @Injectable()
 export class DrizzleCategoryRepository
   implements CategoryRepository, OnModuleInit
 {
   private readonly logger = new Logger(DrizzleCategoryRepository.name);
-  private db: BetterSQLite3Database | LibSQLDatabase;
+  private db: LibSQLDatabase<typeof schema>;
 
   constructor(private readonly drizzleService: DrizzleService) {}
 
   onModuleInit() {
-    this.db = this.drizzleService.getClient(DrizzleCategoryRepository.name);
+    this.db = this.drizzleService.getClient(
+      DrizzleCategoryRepository.name,
+    ) as LibSQLDatabase<typeof schema>;
   }
 
   async create(createCategoryDto: CreateCategoryDto): Promise<Category> {
@@ -41,7 +50,7 @@ export class DrizzleCategoryRepository
         .returning()
         .get();
     } catch (error) {
-      this.handleErrors(error);
+      handleDrizzleErrors(error, 'category', this.logger);
     }
     return categoryDb;
   }
@@ -56,7 +65,7 @@ export class DrizzleCategoryRepository
         .where(eq(category.id, id))
         .get();
     } catch (error) {
-      this.handleErrors(error);
+      handleDrizzleErrors(error, 'category', this.logger);
     }
 
     if (!categoryDb)
@@ -65,14 +74,32 @@ export class DrizzleCategoryRepository
     return categoryDb;
   }
 
-  async findAll(): Promise<Category[]> {
-    let categoryListDb: Category[];
+  async findAll({
+    limit,
+    page,
+  }: PaginationQueryDto): Promise<FindAllResponse<Category[]>> {
     try {
-      categoryListDb = await this.db.select().from(category).all();
+      const { totalItems } = await this.db
+        .select({ totalItems: count() })
+        .from(category)
+        .get();
+
+      const pagination = calculatePaginationData(totalItems, limit, page);
+
+      const categoryListDb = await this.db
+        .select()
+        .from(category)
+        .limit(limit)
+        .offset(calculateOffset(limit, page))
+        .all();
+
+      return {
+        data: categoryListDb,
+        pagination,
+      };
     } catch (error) {
-      this.handleErrors(error);
+      handleDrizzleErrors(error, 'category', this.logger);
     }
-    return categoryListDb;
   }
 
   async update(
@@ -89,7 +116,7 @@ export class DrizzleCategoryRepository
         .returning()
         .get();
     } catch (error) {
-      this.handleErrors(error);
+      handleDrizzleErrors(error, 'category', this.logger);
     }
 
     if (!categoryDb)
@@ -109,20 +136,11 @@ export class DrizzleCategoryRepository
         .returning()
         .get();
     } catch (error) {
-      this.handleErrors(error);
+      handleDrizzleErrors(error, 'category', this.logger);
     }
     if (!categoryDb)
       throw new BadRequestException(
         `Delete failed!. The category with id ${id} not found.`,
       );
-  }
-
-  handleErrors(error: any) {
-    if (error.message.includes('UNIQUE constraint'))
-      throw new BadRequestException(`the category already exist`);
-
-    this.logger.fatal(error);
-
-    throw new InternalServerErrorException(error);
   }
 }

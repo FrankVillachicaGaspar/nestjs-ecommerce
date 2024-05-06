@@ -7,17 +7,19 @@ import { User } from 'src/user/interfaces/user.interface';
 import { Role } from '../interfaces/role.interface';
 import { DrizzleService } from 'src/drizzle/drizzle.service';
 import { LibSQLDatabase } from 'drizzle-orm/libsql';
-import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { category, product, role, setting, user } from 'drizzle/schema';
+import * as schema from 'drizzle/schema';
 
 @Injectable()
 export class DrizzleSeedRepository implements SeedRepository, OnModuleInit {
-  private db: BetterSQLite3Database | LibSQLDatabase;
+  private db: LibSQLDatabase<typeof schema>;
 
   constructor(private readonly drizzleService: DrizzleService) {}
 
   onModuleInit() {
-    this.db = this.drizzleService.getClient(DrizzleSeedRepository.name);
+    this.db = this.drizzleService.getClient(
+      DrizzleSeedRepository.name,
+    ) as LibSQLDatabase<typeof schema>;
   }
 
   async cleanDatabaseRecords(): Promise<void> {

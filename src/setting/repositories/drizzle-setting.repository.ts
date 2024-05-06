@@ -10,23 +10,32 @@ import { SettingRepository } from '../interfaces/setting-adapter.interface';
 import { CreateSettingDto } from '../dto/create-setting.dto';
 import { UpdateSettingDto } from '../dto/update-setting.dto';
 import { Setting } from '../interfaces/setting.interfaces';
-import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { LibSQLDatabase } from 'drizzle-orm/libsql';
 import { DrizzleService } from 'src/drizzle/drizzle.service';
 import { setting } from 'drizzle/schema';
-import { eq } from 'drizzle-orm';
+import { count, eq } from 'drizzle-orm';
+import * as schema from 'drizzle/schema';
+import { FindAllResponse } from 'src/common/interfaces/find-all-response.dto';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import {
+  calculateOffset,
+  calculatePaginationData,
+} from 'src/common/utils/pagination.utils';
+import { handleDrizzleErrors } from 'src/common/errors/drizzle.error';
 
 @Injectable()
 export class DrizzleSettingRepository
   implements SettingRepository, OnModuleInit
 {
   private readonly logger = new Logger(DrizzleSettingRepository.name);
-  private db: BetterSQLite3Database | LibSQLDatabase;
+  private db: LibSQLDatabase<typeof schema>;
 
   constructor(private drizzleService: DrizzleService) {}
 
   onModuleInit() {
-    this.db = this.drizzleService.getClient(DrizzleSettingRepository.name);
+    this.db = this.drizzleService.getClient(
+      DrizzleSettingRepository.name,
+    ) as LibSQLDatabase<typeof schema>;
   }
 
   async create(createSettingDto: CreateSettingDto): Promise<Setting> {
@@ -41,19 +50,37 @@ export class DrizzleSettingRepository
         .returning()
         .get();
     } catch (error) {
-      this.handleErrors(error);
+      handleDrizzleErrors(error, 'setting', this.logger);
     }
     return settingDb;
   }
 
-  async getAll(): Promise<Setting[]> {
-    let settingListDb: Setting[];
+  async getAll({
+    limit,
+    page,
+  }: PaginationQueryDto): Promise<FindAllResponse<Setting[]>> {
     try {
-      settingListDb = await this.db.select().from(setting).all();
+      const { totalItems } = await this.db
+        .select({ totalItems: count() })
+        .from(setting)
+        .get();
+
+      const pagination = calculatePaginationData(totalItems, limit, page);
+
+      const settingListDb = await this.db
+        .select()
+        .from(setting)
+        .limit(limit)
+        .offset(calculateOffset(limit, page))
+        .all();
+
+      return {
+        data: settingListDb,
+        pagination,
+      };
     } catch (error) {
-      this.handleErrors(error);
+      handleDrizzleErrors(error, 'setting', this.logger);
     }
-    return settingListDb;
   }
 
   async getById(id: number): Promise<Setting> {
@@ -65,7 +92,7 @@ export class DrizzleSettingRepository
         .where(eq(setting.id, id))
         .get();
     } catch (error) {
-      this.handleErrors(error);
+      handleDrizzleErrors(error, 'setting', this.logger);
     }
     if (!settingDb)
       throw new NotFoundException(`Setting whit id ${id} not found!`);
@@ -88,7 +115,7 @@ export class DrizzleSettingRepository
         .returning()
         .get();
     } catch (error) {
-      this.handleErrors(error);
+      handleDrizzleErrors(error, 'setting', this.logger);
     }
     if (!settingDb)
       throw new BadRequestException(
@@ -106,19 +133,11 @@ export class DrizzleSettingRepository
         .returning()
         .get();
     } catch (error) {
-      this.handleErrors(error);
+      handleDrizzleErrors(error, 'setting', this.logger);
     }
     if (!settingDb)
       throw new BadRequestException(
         `Delete failed!.Setting with id ${id} not found`,
       );
-  }
-
-  handleErrors(error: any) {
-    if (error.message.includes('UNIQUE constraint'))
-      throw new BadRequestException(`The product already exist`);
-
-    this.logger.fatal(error);
-    throw new InternalServerErrorException(error);
   }
 }

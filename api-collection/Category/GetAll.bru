@@ -5,7 +5,11 @@ meta {
 }
 
 get {
-  url: {{API_URL}}/category
+  url: {{API_URL}}/category?page=11
   body: none
   auth: none
+}
+
+query {
+  page: 11
 }

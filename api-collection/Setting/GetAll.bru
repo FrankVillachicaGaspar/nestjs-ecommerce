@@ -5,7 +5,11 @@ meta {
 }
 
 get {
-  url: {{API_URL}}/setting
+  url: {{API_URL}}/setting?page=1
   body: none
   auth: none
+}
+
+query {
+  page: 1
 }
