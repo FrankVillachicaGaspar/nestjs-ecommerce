@@ -1,0 +1,20 @@
+meta {
+  name: Create
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{API_URL}}/setting-data
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "code": "Testing",
+    "desc": "This setting data is for testing.",
+    "value": "1",
+    "settingId": 3
+  }
+}
