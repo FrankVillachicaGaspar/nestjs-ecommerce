@@ -1,3 +1,5 @@
+import { Category } from "src/category/interfaces/category.interface";
+
 export interface Product {
   id: number;
   name: string;
@@ -8,4 +10,5 @@ export interface Product {
   createdAt: string;
   modifiedAt?: string;
   deletedAt?: string;
+  category?: Category;
 }
