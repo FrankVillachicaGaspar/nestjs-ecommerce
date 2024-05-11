@@ -10,7 +10,6 @@ import { CreateProductDto } from '../dto/create-product.dto';
 import { UpdateProductDto } from '../dto/update-product.dto';
 import { Product } from '../interfaces/product.interface';
 import { DrizzleService } from 'src/drizzle/drizzle.service';
-import { product } from 'drizzle/schema';
 import { count, eq, sql } from 'drizzle-orm';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import * as schema from 'drizzle/schema';
@@ -40,11 +39,13 @@ export class DrizzleProductRepository
   async create(createProductDto: CreateProductDto): Promise<Product> {
     let productDb: Product;
     try {
-      productDb = await this.db
-        .insert(product)
+      const { productId } = await this.db
+        .insert(schema.product)
         .values({ ...createProductDto, createdAt: new Date().toISOString() })
-        .returning()
+        .returning({ productId: schema.product.id })
         .get();
+
+      productDb = await this.findById(productId);
     } catch (error) {
       handleDrizzleErrors(error, 'product', this.logger);
     }
@@ -55,9 +56,31 @@ export class DrizzleProductRepository
     let productDb: Product;
     try {
       productDb = await this.db
-        .select()
-        .from(product)
-        .where(eq(product.id, id))
+        .select({
+          id: schema.product.id,
+          name: schema.product.name,
+          desc: schema.product.desc,
+          stock: schema.product.stock,
+          categoryId: schema.product.categoryId,
+          price: schema.product.price,
+          createdAt: schema.product.createdAt,
+          modifiedAt: schema.product.modifiedAt,
+          deletedAt: schema.product.deletedAt,
+          category: {
+            id: schema.category.id,
+            name: schema.category.name,
+            desc: schema.category.desc,
+            createdAt: schema.category.createdAt,
+            modifiedAt: schema.category.modifiedAt,
+            deletedAt: schema.category.deletedAt,
+          },
+        })
+        .from(schema.product)
+        .innerJoin(
+          schema.category,
+          eq(schema.product.categoryId, schema.category.id),
+        )
+        .where(eq(schema.product.id, id))
         .get();
     } catch (error) {
       handleDrizzleErrors(error, 'product', this.logger);
@@ -75,14 +98,36 @@ export class DrizzleProductRepository
     try {
       const { totalItems } = await this.db
         .select({ totalItems: count() })
-        .from(product)
+        .from(schema.product)
         .get();
 
       const pagination = calculatePaginationData(totalItems, limit, page);
 
-      const products = await this.db
-        .select()
-        .from(product)
+      const products: Product[] = await this.db
+        .select({
+          id: schema.product.id,
+          name: schema.product.name,
+          desc: schema.product.desc,
+          stock: schema.product.stock,
+          categoryId: schema.product.categoryId,
+          price: schema.product.price,
+          createdAt: schema.product.createdAt,
+          modifiedAt: schema.product.modifiedAt,
+          deletedAt: schema.product.deletedAt,
+          category: {
+            id: schema.category.id,
+            name: schema.category.name,
+            desc: schema.category.desc,
+            createdAt: schema.category.createdAt,
+            modifiedAt: schema.category.modifiedAt,
+            deletedAt: schema.category.deletedAt,
+          },
+        })
+        .from(schema.product)
+        .innerJoin(
+          schema.category,
+          eq(schema.product.categoryId, schema.category.id),
+        )
         .limit(limit)
         .offset(calculateOffset(limit, page))
         .all();
@@ -102,12 +147,14 @@ export class DrizzleProductRepository
   ): Promise<Product> {
     let productDb: Product;
     try {
-      productDb = await this.db
-        .update(product)
+      const { productId } = await this.db
+        .update(schema.product)
         .set({ ...updateProductDto, modifiedAt: new Date().toISOString() })
-        .where(eq(product.id, id))
-        .returning()
+        .where(eq(schema.product.id, id))
+        .returning({ productId: schema.product.id })
         .get();
+
+      productDb = await this.findById(productId);
     } catch (error) {
       handleDrizzleErrors(error, 'product', this.logger);
     }
@@ -122,8 +169,8 @@ export class DrizzleProductRepository
     let productDb: Product;
     try {
       productDb = await this.db
-        .delete(product)
-        .where(eq(product.id, id))
+        .delete(schema.product)
+        .where(eq(schema.product.id, id))
         .returning()
         .get();
     } catch (error) {
