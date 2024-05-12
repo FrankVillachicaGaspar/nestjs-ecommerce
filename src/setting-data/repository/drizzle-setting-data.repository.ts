@@ -43,17 +43,6 @@ export class DrizzleSettingDataRepository
     let settingDataDb: SettingData;
 
     try {
-      const setting: Setting = await this.db
-        .select()
-        .from(schema.setting)
-        .where(eq(schema.setting.id, createSettingDataDto.settingId))
-        .get();
-
-      if (setting)
-        throw new BadRequestException(
-          `the setting with id ${createSettingDataDto.settingId} not found`,
-        );
-
       settingDataDb = await this.db
         .insert(schema.settingData)
         .values({

@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  HttpException,
   InternalServerErrorException,
   Logger,
   NotFoundException,
@@ -14,13 +15,13 @@ export const handleDrizzleErrors = (
   if (error.code === constantsUtils.PAGINATION_ERROR)
     throw new NotFoundException(error.message);
 
-  if (error.code.includes('SQLITE_CONSTRAINT_FOREIGNKEY'))
+  if (error.code?.includes('SQLITE_CONSTRAINT_FOREIGNKEY'))
     throw new BadRequestException(`The ${entityName} not found`);
 
-  if (error.message.includes('UNIQUE constraint'))
+  if (error.message?.includes('UNIQUE constraint'))
     throw new BadRequestException(`The ${entityName} already exist`);
 
-  if (!(error instanceof Error)) throw error;
+  if (error instanceof HttpException) throw error;
 
   logger.fatal(error);
   throw new InternalServerErrorException(error);
