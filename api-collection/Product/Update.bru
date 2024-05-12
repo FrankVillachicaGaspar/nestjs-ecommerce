@@ -5,13 +5,14 @@ meta {
 }
 
 patch {
-  url: {{API_URL}}/product/31
+  url: {{API_URL}}/product/1
   body: json
   auth: none
 }
 
 body:json {
   {
-    "stock": 100
+    "stock": 100,
+    "categoryId": 3
   }
 }

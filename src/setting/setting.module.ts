@@ -9,5 +9,6 @@ import { CommonModule } from 'src/common/common.module';
   controllers: [SettingsController],
   providers: [SettingsService, DrizzleSettingRepository],
   imports: [DrizzleModule, CommonModule],
+  exports: [DrizzleSettingRepository],
 })
 export class SettingsModule {}

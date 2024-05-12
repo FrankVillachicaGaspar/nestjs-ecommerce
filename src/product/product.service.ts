@@ -6,15 +6,19 @@ import { DtoConverter } from 'src/common/providers/dto-converter.provider';
 import { GetProductDto } from './dto/get-product.dto';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { FindAllResponse } from 'src/common/interfaces/find-all-response.dto';
+import { DrizzleCategoryRepository } from 'src/category/repositories/drizzle-category.repository';
 
 @Injectable()
 export class ProductService {
   constructor(
     private readonly productRepository: DrizzleProductRepository,
     private readonly dtoConverter: DtoConverter,
+    private readonly categoryRepository: DrizzleCategoryRepository,
   ) {}
 
   async create(createProductDto: CreateProductDto): Promise<GetProductDto> {
+    await this.categoryRepository.findById(createProductDto.categoryId);
+
     const product = await this.productRepository.create(createProductDto);
 
     return this.dtoConverter.plainToDto(GetProductDto, product);
@@ -45,6 +49,8 @@ export class ProductService {
     id: number,
     updateProductDto: UpdateProductDto,
   ): Promise<GetProductDto> {
+    await this.categoryRepository.findById(updateProductDto.categoryId);
+
     const product = await this.productRepository.update(id, updateProductDto);
 
     return this.dtoConverter.plainToDto(GetProductDto, product);

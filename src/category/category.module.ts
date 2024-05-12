@@ -9,5 +9,6 @@ import { DrizzleCategoryRepository } from './repositories/drizzle-category.repos
   controllers: [CategoryController],
   providers: [CategoryService, DrizzleCategoryRepository],
   imports: [DrizzleModule, CommonModule],
+  exports: [DrizzleCategoryRepository],
 })
 export class CategoryModule {}

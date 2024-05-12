@@ -6,17 +6,21 @@ import { DtoConverter } from 'src/common/providers/dto-converter.provider';
 import { GetSettingDataDto } from './dto/get-setting-data.dto';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { FindAllResponse } from 'src/common/interfaces/find-all-response.dto';
+import { DrizzleSettingRepository } from 'src/setting/repositories/drizzle-setting.repository';
 
 @Injectable()
 export class SettingDataService {
   constructor(
     private readonly settingDataRepository: DrizzleSettingDataRepository,
     private readonly dtoConverter: DtoConverter,
+    private readonly settingRepository: DrizzleSettingRepository,
   ) {}
 
   async create(
     createSettingDataDto: CreateSettingDataDto,
   ): Promise<GetSettingDataDto> {
+    await this.settingRepository.getById(createSettingDataDto.settingId);
+
     const settingData =
       await this.settingDataRepository.create(createSettingDataDto);
 
@@ -49,6 +53,8 @@ export class SettingDataService {
     id: number,
     updateSettingDataDto: UpdateSettingDataDto,
   ): Promise<GetSettingDataDto> {
+    await this.settingRepository.getById(updateSettingDataDto.settingId);
+
     const settingData = await this.settingDataRepository.update(
       id,
       updateSettingDataDto,
