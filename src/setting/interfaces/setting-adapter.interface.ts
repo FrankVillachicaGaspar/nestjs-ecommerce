@@ -8,6 +8,7 @@ export interface SettingRepository {
   create(createSettingDto: CreateSettingDto): Promise<Setting>;
   getAll(pagination: PaginationQueryDto): Promise<FindAllResponse<Setting[]>>;
   getById(id: number): Promise<Setting>;
+  getByIdFull(id: number): Promise<Setting>;
   update(id: number, updateSettingDto: UpdateSettingDto): Promise<Setting>;
   remove(id: number): Promise<void>;
 }

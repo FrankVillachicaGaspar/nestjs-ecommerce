@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   Injectable,
-  InternalServerErrorException,
   Logger,
   NotFoundException,
   OnModuleInit,
@@ -97,6 +96,24 @@ export class DrizzleSettingRepository
     if (!settingDb)
       throw new NotFoundException(`Setting whit id ${id} not found!`);
     return settingDb;
+  }
+
+  async getByIdFull(id: number): Promise<Setting> {
+    try {
+      const settingDb: Setting = await this.db.query.setting.findFirst({
+        where: (setting, { eq }) => eq(setting.id, id),
+        with: {
+          settingData: true,
+        },
+      });
+
+      if (!settingDb)
+        throw new NotFoundException(`setting with id ${id} not found`);
+
+      return settingDb;
+    } catch (error) {
+      handleDrizzleErrors(error, 'setting', this.logger);
+    }
   }
 
   async update(

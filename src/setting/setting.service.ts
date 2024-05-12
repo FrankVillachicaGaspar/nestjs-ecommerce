@@ -39,7 +39,15 @@ export class SettingsService {
     return this.dtoConverter.plainToDto(GetSettingDto, setting);
   }
 
-  async update(id: number, updateSettingDto: UpdateSettingDto): Promise<GetSettingDto> {
+  async findOneGetFull(id: number): Promise<GetSettingDto> {
+    const setting = await this.settingRepository.getByIdFull(id);
+    return this.dtoConverter.plainToDto(GetSettingDto, setting);
+  }
+
+  async update(
+    id: number,
+    updateSettingDto: UpdateSettingDto,
+  ): Promise<GetSettingDto> {
     const setting = await this.settingRepository.update(id, updateSettingDto);
     return this.dtoConverter.plainToDto(GetSettingDto, setting);
   }

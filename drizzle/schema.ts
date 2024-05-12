@@ -1,3 +1,4 @@
+import { relations } from 'drizzle-orm';
 import {
   index,
   integer,
@@ -90,6 +91,10 @@ export const setting = sqliteTable(
   },
 );
 
+export const settingRelations = relations(setting, ({ many }) => ({
+  settingData: many(settingData),
+}));
+
 export const settingData = sqliteTable(
   'settingData',
   {
@@ -97,7 +102,7 @@ export const settingData = sqliteTable(
     code: text('code').notNull().unique(),
     desc: text('desc').notNull(),
     value: text('value').notNull(),
-    settingId: integer('setting_id').references(() => setting.id),
+    settingId: integer('setting_id'),
     createdAt: text('created_at').notNull(),
     modifiedAt: text('modified_at'),
     deletedAt: text('deleted_at'),
@@ -106,3 +111,10 @@ export const settingData = sqliteTable(
     return { codeIndex: index('setting_data_code_index').on(table.code) };
   },
 );
+
+export const settingDataRelations = relations(settingData, ({ one }) => ({
+  setting: one(setting, {
+    fields: [settingData.settingId],
+    references: [setting.id],
+  }),
+}));

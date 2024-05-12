@@ -33,6 +33,11 @@ export class SettingsController {
     return this.settingsService.findOne(id);
   }
 
+  @Get('get-full/:id')
+  findOneGetFull(@Param('id', new ParseIntPipe()) id: number) {
+    return this.settingsService.findOneGetFull(id);
+  }
+
   @Patch(':id')
   update(
     @Param('id', new ParseIntPipe()) id: number,
