@@ -20,7 +20,6 @@ import {
   calculateOffset,
   calculatePaginationData,
 } from 'src/common/utils/pagination.utils';
-import { Setting } from 'src/setting/interfaces/setting.interfaces';
 
 @Injectable()
 export class DrizzleSettingDataRepository
@@ -61,11 +60,12 @@ export class DrizzleSettingDataRepository
     let settingDataDb: SettingData;
 
     try {
-      settingDataDb = await this.db
-        .select()
-        .from(schema.settingData)
-        .where(eq(schema.settingData.id, id))
-        .get();
+      settingDataDb = await this.db.query.settingData.findFirst({
+        where: (settingData, { eq }) => eq(settingData.id, id),
+        with: {
+          setting: true
+        }
+      });
     } catch (error) {
       handleDrizzleErrors(error, 'setting data', this.logger);
     }

@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Query,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { SettingDataService } from './setting-data.service';
 import { CreateSettingDataDto } from './dto/create-setting-data.dto';
@@ -28,20 +29,20 @@ export class SettingDataController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.settingDataService.findOne(+id);
+  findOne(@Param('id', new ParseIntPipe()) id: number) {
+    return this.settingDataService.findOne(id);
   }
 
   @Patch(':id')
   update(
-    @Param('id') id: string,
+    @Param('id', new ParseIntPipe()) id: number,
     @Body() updateSettingDataDto: UpdateSettingDataDto,
   ) {
-    return this.settingDataService.update(+id, updateSettingDataDto);
+    return this.settingDataService.update(id, updateSettingDataDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.settingDataService.remove(+id);
+  remove(@Param('id', new ParseIntPipe()) id: number) {
+    return this.settingDataService.remove(id);
   }
 }
