@@ -56,6 +56,10 @@ export const category = sqliteTable('category', {
   deletedAt: text('deleted_at'),
 });
 
+export const categoryRelations = relations(category, ({ many }) => ({
+  product: many(product),
+}));
+
 export const product = sqliteTable(
   'product',
   {
@@ -63,7 +67,7 @@ export const product = sqliteTable(
     name: text('name').notNull(),
     desc: text('desc').notNull(),
     stock: integer('stock'),
-    categoryId: integer('category_id').references(() => category.id),
+    categoryId: integer('category_id'),
     price: real('price'),
     createdAt: text('created_at').notNull(),
     modifiedAt: text('modified_at'),
@@ -75,6 +79,13 @@ export const product = sqliteTable(
     };
   },
 );
+
+export const productRelations = relations(product, ({ one }) => ({
+  category: one(category, {
+    fields: [product.categoryId],
+    references: [category.id],
+  }),
+}));
 
 export const setting = sqliteTable(
   'setting',
