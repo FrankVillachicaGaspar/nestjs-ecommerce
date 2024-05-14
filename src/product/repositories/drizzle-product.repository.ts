@@ -10,7 +10,7 @@ import { CreateProductDto } from '../dto/create-product.dto';
 import { UpdateProductDto } from '../dto/update-product.dto';
 import { Product } from '../interfaces/product.interface';
 import { DrizzleService } from 'src/drizzle/drizzle.service';
-import { count, eq, sql } from 'drizzle-orm';
+import { count, eq } from 'drizzle-orm';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import * as schema from 'drizzle/schema';
 import { LibSQLDatabase } from 'drizzle-orm/libsql';
@@ -53,42 +53,21 @@ export class DrizzleProductRepository
   }
 
   async findById(id: number): Promise<Product> {
-    let productDb: Product;
     try {
-      productDb = await this.db
-        .select({
-          id: schema.product.id,
-          name: schema.product.name,
-          desc: schema.product.desc,
-          stock: schema.product.stock,
-          categoryId: schema.product.categoryId,
-          price: schema.product.price,
-          createdAt: schema.product.createdAt,
-          modifiedAt: schema.product.modifiedAt,
-          deletedAt: schema.product.deletedAt,
-          category: {
-            id: schema.category.id,
-            name: schema.category.name,
-            desc: schema.category.desc,
-            createdAt: schema.category.createdAt,
-            modifiedAt: schema.category.modifiedAt,
-            deletedAt: schema.category.deletedAt,
-          },
-        })
-        .from(schema.product)
-        .innerJoin(
-          schema.category,
-          eq(schema.product.categoryId, schema.category.id),
-        )
-        .where(eq(schema.product.id, id))
-        .get();
+      const productDb: Product = await this.db.query.product.findFirst({
+        where: (product, { eq }) => eq(product.id, id),
+        with: {
+          category: true,
+        },
+      });
+
+      if (!productDb)
+        throw new NotFoundException(`Product with id ${id} not found`);
+
+      return productDb;
     } catch (error) {
       handleDrizzleErrors(error, 'product', this.logger);
     }
-    if (!productDb)
-      throw new NotFoundException(`Product with id ${id} not found`);
-
-    return productDb;
   }
 
   async findAll({
@@ -103,34 +82,13 @@ export class DrizzleProductRepository
 
       const pagination = calculatePaginationData(totalItems, limit, page);
 
-      const products: Product[] = await this.db
-        .select({
-          id: schema.product.id,
-          name: schema.product.name,
-          desc: schema.product.desc,
-          stock: schema.product.stock,
-          categoryId: schema.product.categoryId,
-          price: schema.product.price,
-          createdAt: schema.product.createdAt,
-          modifiedAt: schema.product.modifiedAt,
-          deletedAt: schema.product.deletedAt,
-          category: {
-            id: schema.category.id,
-            name: schema.category.name,
-            desc: schema.category.desc,
-            createdAt: schema.category.createdAt,
-            modifiedAt: schema.category.modifiedAt,
-            deletedAt: schema.category.deletedAt,
-          },
-        })
-        .from(schema.product)
-        .innerJoin(
-          schema.category,
-          eq(schema.product.categoryId, schema.category.id),
-        )
-        .limit(limit)
-        .offset(calculateOffset(limit, page))
-        .all();
+      const products: Product[] = await this.db.query.product.findMany({
+        with: {
+          category: true,
+        },
+        limit,
+        offset: calculateOffset(limit, page),
+      });
 
       return {
         data: products,
@@ -145,40 +103,41 @@ export class DrizzleProductRepository
     id: number,
     updateProductDto: UpdateProductDto,
   ): Promise<Product> {
-    let productDb: Product;
     try {
-      const { productId } = await this.db
+      const result = await this.db
         .update(schema.product)
         .set({ ...updateProductDto, modifiedAt: new Date().toISOString() })
         .where(eq(schema.product.id, id))
         .returning({ productId: schema.product.id })
         .get();
 
-      productDb = await this.findById(productId);
+      if (!result)
+        throw new BadRequestException(
+          `Update failed. Product with id ${id} not found`,
+        );
+
+      const productDb: Product = await this.findById(result.productId);
+
+      return productDb;
     } catch (error) {
       handleDrizzleErrors(error, 'product', this.logger);
     }
-    if (!productDb)
-      throw new BadRequestException(
-        `Update failed. Product with id ${id} not found`,
-      );
-    return productDb;
   }
 
   async remove(id: number): Promise<void> {
-    let productDb: Product;
     try {
-      productDb = await this.db
+      const productDb: Product = await this.db
         .delete(schema.product)
         .where(eq(schema.product.id, id))
         .returning()
         .get();
+
+      if (!productDb)
+        throw new BadRequestException(
+          `Delete failed!. The product with id ${id} not found`,
+        );
     } catch (error) {
       handleDrizzleErrors(error, 'product', this.logger);
     }
-    if (!productDb)
-      throw new BadRequestException(
-        `Delete failed!. The product with id ${id} not found`,
-      );
   }
 }
