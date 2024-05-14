@@ -20,7 +20,6 @@ import {
   calculateOffset,
   calculatePaginationData,
 } from 'src/common/utils/pagination.utils';
-import { Setting } from 'src/setting/interfaces/setting.interfaces';
 
 @Injectable()
 export class DrizzleSettingDataRepository
