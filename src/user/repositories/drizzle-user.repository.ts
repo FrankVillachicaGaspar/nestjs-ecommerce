@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   Injectable,
-  InternalServerErrorException,
   Logger,
   NotFoundException,
   OnModuleInit,
@@ -39,9 +38,8 @@ export default class DrizzleUserRepository
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    let userDb: User;
     try {
-      userDb = await this.db
+      const userDb: User = await this.db
         .insert(user)
         .values({
           ...createUserDto,
@@ -49,10 +47,11 @@ export default class DrizzleUserRepository
         })
         .returning()
         .get();
+
+      return userDb;
     } catch (error) {
       handleDrizzleErrors(error, 'user', this.logger);
     }
-    return userDb;
   }
 
   async findAll({
@@ -84,55 +83,55 @@ export default class DrizzleUserRepository
   }
 
   async findById(id: number): Promise<User> {
-    let userDb: User;
-
     try {
-      userDb = await this.db.select().from(user).where(eq(user.id, id)).get();
+      const userDb: User = await this.db
+        .select()
+        .from(user)
+        .where(eq(user.id, id))
+        .get();
+
+      if (!userDb) throw new NotFoundException(`User with id ${id} not found.`);
+
+      return userDb;
     } catch (error) {
       handleDrizzleErrors(error, 'user', this.logger);
     }
-
-    if (!userDb) throw new NotFoundException(`User with id ${id} not found.`);
-
-    return userDb;
   }
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
-    let userDb: User;
-
     try {
-      userDb = await this.db
+      const userDb: User = await this.db
         .update(user)
         .set({ ...updateUserDto, modifiedAt: new Date().toISOString() })
         .where(eq(user.id, id))
         .returning()
         .get();
+
+      if (!userDb)
+        throw new BadRequestException(
+          `Update failed. User with id ${id} not found.`,
+        );
+
+      return userDb;
     } catch (error) {
       handleDrizzleErrors(error, 'user', this.logger);
     }
-
-    if (!userDb)
-      throw new BadRequestException(
-        `Update failed. User with id ${id} not found.`,
-      );
-
-    return userDb;
   }
 
   async remove(id: number): Promise<void> {
-    let userDb: User;
     try {
-      userDb = await this.db
+      const userDb: User = await this.db
         .delete(user)
         .where(eq(user.id, id))
         .returning()
         .get();
+
+      if (!userDb)
+        throw new BadRequestException(
+          `Delete failed!. The user with id ${id} not found.`,
+        );
     } catch (error) {
       handleDrizzleErrors(error, 'user', this.logger);
     }
-    if (!userDb)
-      throw new BadRequestException(
-        `Delete failed!. The user with id ${id} not found.`,
-      );
   }
 }

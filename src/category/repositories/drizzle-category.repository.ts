@@ -39,9 +39,8 @@ export class DrizzleCategoryRepository
   }
 
   async create(createCategoryDto: CreateCategoryDto): Promise<Category> {
-    let categoryDb: Category;
     try {
-      categoryDb = await this.db
+      const categoryDb: Category = await this.db
         .insert(category)
         .values({
           ...createCategoryDto,
@@ -49,29 +48,28 @@ export class DrizzleCategoryRepository
         })
         .returning()
         .get();
+
+      return categoryDb;
     } catch (error) {
       handleDrizzleErrors(error, 'category', this.logger);
     }
-    return categoryDb;
   }
 
   async findById(id: number): Promise<Category> {
-    let categoryDb: Category;
-
     try {
-      categoryDb = await this.db
+      const categoryDb: Category = await this.db
         .select()
         .from(category)
         .where(eq(category.id, id))
         .get();
+
+      if (!categoryDb)
+        throw new NotFoundException(`Category with id ${id} not found.`);
+
+      return categoryDb;
     } catch (error) {
       handleDrizzleErrors(error, 'category', this.logger);
     }
-
-    if (!categoryDb)
-      throw new NotFoundException(`Category with id ${id} not found.`);
-
-    return categoryDb;
   }
 
   async findAll({
@@ -106,41 +104,39 @@ export class DrizzleCategoryRepository
     id: number,
     updateCategoryDto: UpdateCategoryDto,
   ): Promise<Category> {
-    let categoryDb: Category;
-
     try {
-      categoryDb = await this.db
+      const categoryDb: Category = await this.db
         .update(category)
         .set({ ...updateCategoryDto, modifiedAt: new Date().toISOString() })
         .where(eq(category.id, id))
         .returning()
         .get();
+
+      if (!categoryDb)
+        throw new BadRequestException(
+          `Update failed. Category with id ${id} not found.`,
+        );
+
+      return categoryDb;
     } catch (error) {
       handleDrizzleErrors(error, 'category', this.logger);
     }
-
-    if (!categoryDb)
-      throw new BadRequestException(
-        `Update failed. Category with id ${id} not found.`,
-      );
-
-    return categoryDb;
   }
 
   async remove(id: number): Promise<void> {
-    let categoryDb: Category;
     try {
-      categoryDb = await this.db
+      const categoryDb: Category = await this.db
         .delete(category)
         .where(eq(category.id, id))
         .returning()
         .get();
+
+      if (!categoryDb)
+        throw new BadRequestException(
+          `Delete failed!. The category with id ${id} not found.`,
+        );
     } catch (error) {
       handleDrizzleErrors(error, 'category', this.logger);
     }
-    if (!categoryDb)
-      throw new BadRequestException(
-        `Delete failed!. The category with id ${id} not found.`,
-      );
   }
 }

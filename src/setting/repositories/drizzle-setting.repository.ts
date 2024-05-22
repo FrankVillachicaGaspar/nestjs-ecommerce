@@ -38,9 +38,8 @@ export class DrizzleSettingRepository
   }
 
   async create(createSettingDto: CreateSettingDto): Promise<Setting> {
-    let settingDb: Setting;
     try {
-      settingDb = await this.db
+      const settingDb: Setting = await this.db
         .insert(setting)
         .values({
           ...createSettingDto,
@@ -48,10 +47,11 @@ export class DrizzleSettingRepository
         })
         .returning()
         .get();
+
+      return settingDb;
     } catch (error) {
       handleDrizzleErrors(error, 'setting', this.logger);
     }
-    return settingDb;
   }
 
   async getAll({
@@ -83,19 +83,20 @@ export class DrizzleSettingRepository
   }
 
   async getById(id: number): Promise<Setting> {
-    let settingDb: Setting;
     try {
-      settingDb = await this.db
+      const settingDb: Setting = await this.db
         .select()
         .from(setting)
         .where(eq(setting.id, id))
         .get();
+
+      if (!settingDb)
+        throw new NotFoundException(`Setting whit id ${id} not found!`);
+
+      return settingDb;
     } catch (error) {
       handleDrizzleErrors(error, 'setting', this.logger);
     }
-    if (!settingDb)
-      throw new NotFoundException(`Setting whit id ${id} not found!`);
-    return settingDb;
   }
 
   async getByIdFull(id: number): Promise<Setting> {
@@ -120,9 +121,8 @@ export class DrizzleSettingRepository
     id: number,
     updateSettingDto: UpdateSettingDto,
   ): Promise<Setting> {
-    let settingDb: Setting;
     try {
-      settingDb = await this.db
+      const settingDb: Setting = await this.db
         .update(setting)
         .set({
           ...updateSettingDto,
@@ -131,30 +131,32 @@ export class DrizzleSettingRepository
         .where(eq(setting.id, id))
         .returning()
         .get();
+
+      if (!settingDb)
+        throw new BadRequestException(
+          `Update failed. Setting with id ${id} not found`,
+        );
+
+      return settingDb;
     } catch (error) {
       handleDrizzleErrors(error, 'setting', this.logger);
     }
-    if (!settingDb)
-      throw new BadRequestException(
-        `Update failed. Setting with id ${id} not found`,
-      );
-    return settingDb;
   }
 
   async remove(id: number): Promise<void> {
-    let settingDb: Setting;
     try {
-      settingDb = await this.db
+      const settingDb: Setting = await this.db
         .delete(setting)
         .where(eq(setting.id, id))
         .returning()
         .get();
+
+      if (!settingDb)
+        throw new BadRequestException(
+          `Delete failed!.Setting with id ${id} not found`,
+        );
     } catch (error) {
       handleDrizzleErrors(error, 'setting', this.logger);
     }
-    if (!settingDb)
-      throw new BadRequestException(
-        `Delete failed!.Setting with id ${id} not found`,
-      );
   }
 }
