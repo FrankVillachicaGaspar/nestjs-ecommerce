@@ -39,10 +39,8 @@ export class DrizzleSettingDataRepository
   async create(
     createSettingDataDto: CreateSettingDataDto,
   ): Promise<SettingData> {
-    let settingDataDb: SettingData;
-
     try {
-      settingDataDb = await this.db
+      const settingDataDb: SettingData = await this.db
         .insert(schema.settingData)
         .values({
           ...createSettingDataDto,
@@ -50,31 +48,31 @@ export class DrizzleSettingDataRepository
         })
         .returning()
         .get();
+
+      return settingDataDb;
     } catch (error) {
       handleDrizzleErrors(error, 'setting data', this.logger);
     }
-    return settingDataDb;
   }
 
   async findById(id: number): Promise<SettingData> {
-    let settingDataDb: SettingData;
-
     try {
-      settingDataDb = await this.db.query.settingData.findFirst({
-        where: (settingData, { eq }) => eq(settingData.id, id),
-        with: {
-          setting: true
-        }
-      });
+      const settingDataDb: SettingData =
+        await this.db.query.settingData.findFirst({
+          where: (settingData, { eq }) => eq(settingData.id, id),
+          with: {
+            setting: true,
+          },
+        });
+
+      if (!settingDataDb) {
+        throw new NotFoundException(`the setting data with id ${id} not found`);
+      }
+
+      return settingDataDb;
     } catch (error) {
       handleDrizzleErrors(error, 'setting data', this.logger);
     }
-
-    if (!settingDataDb) {
-      throw new NotFoundException(`the setting data with id ${id} not found`);
-    }
-
-    return settingDataDb;
   }
 
   async findAll({
@@ -109,9 +107,8 @@ export class DrizzleSettingDataRepository
     id: number,
     updateSettingDataDto: UpdateSettingDataDto,
   ): Promise<SettingData> {
-    let settingDataDb: SettingData;
     try {
-      settingDataDb = await this.db
+      const settingDataDb: SettingData = await this.db
         .update(schema.settingData)
         .set({
           ...updateSettingDataDto,
@@ -120,30 +117,32 @@ export class DrizzleSettingDataRepository
         .where(eq(schema.settingData.id, id))
         .returning()
         .get();
+
+      if (!settingDataDb)
+        throw new BadRequestException(
+          `update failed!. Setting data with id ${id} not found`,
+        );
+
+      return settingDataDb;
     } catch (error) {
       handleDrizzleErrors(error, 'setting data', this.logger);
     }
-    if (!settingDataDb)
-      throw new BadRequestException(
-        `update failed!. Setting data with id ${id} not found`,
-      );
-    return settingDataDb;
   }
 
   async remove(id: number): Promise<void> {
-    let settingDataDb: SettingData;
     try {
-      settingDataDb = await this.db
+      const settingDataDb: SettingData = await this.db
         .delete(schema.settingData)
         .where(eq(schema.settingData.id, id))
         .returning()
         .get();
+
+      if (!settingDataDb)
+        throw new BadRequestException(
+          `Delete failed!. The setting data with id ${id} not found.`,
+        );
     } catch (error) {
       handleDrizzleErrors(error, 'setting data', this.logger);
     }
-    if (!settingDataDb)
-      throw new BadRequestException(
-        `Delete failed!. The setting data with id ${id} not found.`,
-      );
   }
 }

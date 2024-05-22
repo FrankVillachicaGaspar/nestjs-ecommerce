@@ -37,19 +37,17 @@ export class DrizzleProductRepository
   }
 
   async create(createProductDto: CreateProductDto): Promise<Product> {
-    let productDb: Product;
     try {
-      const { productId } = await this.db
+      const product: Product = await this.db
         .insert(schema.product)
         .values({ ...createProductDto, createdAt: new Date().toISOString() })
-        .returning({ productId: schema.product.id })
+        .returning()
         .get();
 
-      productDb = await this.findById(productId);
+      return product;
     } catch (error) {
       handleDrizzleErrors(error, 'product', this.logger);
     }
-    return productDb;
   }
 
   async findById(id: number): Promise<Product> {
