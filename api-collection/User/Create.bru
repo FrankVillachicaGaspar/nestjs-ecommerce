@@ -1,0 +1,23 @@
+meta {
+  name: Create
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{API_URL}}/user
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "username": "usuarioprueba5",
+    "email": "usuarioprueba5@gmail.com",
+    "password": "Anticuchito$300",
+    "firstName": "Luis",
+    "lastName": "Cabrera",
+    "phoneNumber": "+51 990123569",
+    "roleId": 2
+  }
+}

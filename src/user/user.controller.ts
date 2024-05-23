@@ -12,6 +12,7 @@ import {
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('user')
 export class UserController {
@@ -32,8 +33,13 @@ export class UserController {
     return await this.userService.getAll(paginationQueryDto);
   }
 
-  @Patch()
-  async update() {}
+  @Patch(':id')
+  async update(
+    @Param('id', new ParseIntPipe()) id: number,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return await this.userService.update(id, updateUserDto);
+  }
 
   @Delete(':id')
   async remove(@Param('id', new ParseIntPipe()) id: number) {

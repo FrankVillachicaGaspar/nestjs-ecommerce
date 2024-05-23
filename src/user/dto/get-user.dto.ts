@@ -1,4 +1,4 @@
-import { Expose } from 'class-transformer';
+import { Expose, Transform } from 'class-transformer';
 
 export class GetUserDto {
   @Expose()
@@ -21,4 +21,8 @@ export class GetUserDto {
 
   @Expose()
   createdAt: string;
+
+  @Expose()
+  @Transform(({ value }) => value ?? '')
+  modifiedAt?: string;
 }
