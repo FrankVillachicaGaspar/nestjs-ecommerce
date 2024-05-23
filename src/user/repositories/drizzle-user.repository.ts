@@ -10,7 +10,6 @@ import { CreateUserDto } from '../dto/create-user.dto';
 import { User } from '../interfaces/user.interface';
 import { DrizzleService } from 'src/drizzle/drizzle.service';
 import { LibSQLDatabase } from 'drizzle-orm/libsql';
-import { user } from 'drizzle/schema';
 import { count, eq } from 'drizzle-orm';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import * as schema from 'drizzle/schema';
@@ -40,7 +39,7 @@ export default class DrizzleUserRepository
   async create(createUserDto: CreateUserDto): Promise<User> {
     try {
       const userDb: User = await this.db
-        .insert(user)
+        .insert(schema.user)
         .values({
           ...createUserDto,
           createdAt: new Date().toISOString(),
@@ -61,14 +60,14 @@ export default class DrizzleUserRepository
     try {
       const { totalItems } = await this.db
         .select({ totalItems: count() })
-        .from(user)
+        .from(schema.user)
         .get();
 
       const pagination = calculatePaginationData(totalItems, limit, page);
 
       const userListDb = await this.db
         .select()
-        .from(user)
+        .from(schema.user)
         .limit(limit)
         .offset(calculateOffset(limit, page))
         .all();
@@ -86,8 +85,8 @@ export default class DrizzleUserRepository
     try {
       const userDb: User = await this.db
         .select()
-        .from(user)
-        .where(eq(user.id, id))
+        .from(schema.user)
+        .where(eq(schema.user.id, id))
         .get();
 
       if (!userDb) throw new NotFoundException(`User with id ${id} not found.`);
@@ -100,19 +99,19 @@ export default class DrizzleUserRepository
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     try {
-      const userDb: User = await this.db
-        .update(user)
-        .set({ ...updateUserDto, modifiedAt: new Date().toISOString() })
-        .where(eq(user.id, id))
+      await this.findById(id);
+
+      const updatedUser: User = await this.db
+        .update(schema.user)
+        .set({
+          ...updateUserDto,
+          modifiedAt: new Date().toISOString(),
+        })
+        .where(eq(schema.user.id, id))
         .returning()
         .get();
 
-      if (!userDb)
-        throw new BadRequestException(
-          `Update failed. User with id ${id} not found.`,
-        );
-
-      return userDb;
+      return updatedUser;
     } catch (error) {
       handleDrizzleErrors(error, 'user', this.logger);
     }
@@ -121,8 +120,8 @@ export default class DrizzleUserRepository
   async remove(id: number): Promise<void> {
     try {
       const userDb: User = await this.db
-        .delete(user)
-        .where(eq(user.id, id))
+        .delete(schema.user)
+        .where(eq(schema.user.id, id))
         .returning()
         .get();
 

@@ -1,4 +1,4 @@
-import { Expose } from 'class-transformer';
+import { Expose, Transform } from 'class-transformer';
 export class GetCategoryDto {
   @Expose()
   id: number;
@@ -13,5 +13,6 @@ export class GetCategoryDto {
   createdAt: string;
 
   @Expose()
+  @Transform(({ value }) => value ?? '')
   modifiedAt?: string;
 }

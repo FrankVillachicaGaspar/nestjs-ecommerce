@@ -1,4 +1,4 @@
-import { Expose, Type } from 'class-transformer';
+import { Expose, Transform, Type } from 'class-transformer';
 import { ShortCategoryDto } from 'src/category/dto/short-category.dto';
 
 export class GetProductDto {
@@ -21,6 +21,7 @@ export class GetProductDto {
   createdAt: string;
 
   @Expose()
+  @Transform(({ value }) => value ?? '')
   modifiedAt?: string;
 
   @Expose()

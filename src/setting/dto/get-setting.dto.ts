@@ -1,4 +1,4 @@
-import { Expose, Type } from 'class-transformer';
+import { Expose, Transform, Type } from 'class-transformer';
 import { GetSettingDataDto } from 'src/setting-data/dto/get-setting-data.dto';
 import { ShortSettingDataDto } from 'src/setting-data/dto/get-short-setting-data.dto';
 
@@ -16,6 +16,7 @@ export class GetSettingDto {
   createdAt: string;
 
   @Expose()
+  @Transform(({ value }) => value ?? '')
   modifiedAt?: string;
 
   @Expose()

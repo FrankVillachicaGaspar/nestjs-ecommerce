@@ -16,10 +16,23 @@ export const handleDrizzleErrors = (
     throw new NotFoundException(error.message);
 
   if (error.code?.includes('SQLITE_CONSTRAINT_FOREIGNKEY'))
-    throw new BadRequestException(`The ${entityName} not found`);
+    throw new BadRequestException(`the ${entityName} not found`);
 
-  if (error.message?.includes('UNIQUE constraint'))
-    throw new BadRequestException(`The ${entityName} already exist`);
+  if (error.message?.includes('UNIQUE constraint')) {
+    let errorMessage: string;
+    try {
+      const dividedErrorMessage: string[] = error.message.split(':');
+
+      const dividedField: string[] = dividedErrorMessage[1].split('.');
+
+      const field = dividedField[1];
+
+      errorMessage = `the ${entityName} with the entered ${field} already exist`;
+    } catch (error) {
+      errorMessage = `the ${entityName} with the already exist`;
+    }
+    throw new BadRequestException(errorMessage);
+  }
 
   if (error instanceof HttpException) throw error;
 
