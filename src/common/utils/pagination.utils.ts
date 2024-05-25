@@ -6,10 +6,10 @@ export const calculatePaginationData = (
   limit: number,
   page: number,
 ): Pagination => {
-
   const pages = Math.ceil(totalItems / limit);
 
-  if (page > pages) throw new PaginationError(`Page ${page} not found`)
+  if (page > pages && pages != 0)
+    throw new PaginationError(`Page ${page} not found`);
 
   const next = page < pages ? page + 1 : null;
 

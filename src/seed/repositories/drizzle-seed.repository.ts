@@ -8,6 +8,7 @@ import { Role } from '../interfaces/role.interface';
 import { DrizzleService } from 'src/drizzle/drizzle.service';
 import { LibSQLDatabase } from 'drizzle-orm/libsql';
 import * as schema from 'drizzle/schema';
+import { SettingData } from 'src/setting-data/interfaces/setting-data.interface';
 
 @Injectable()
 export class DrizzleSeedRepository implements SeedRepository, OnModuleInit {
@@ -28,6 +29,7 @@ export class DrizzleSeedRepository implements SeedRepository, OnModuleInit {
     await this.db.delete(schema.setting);
     await this.db.delete(schema.category);
     await this.db.delete(schema.role);
+    await this.db.delete(schema.settingData);
   }
 
   async populateRoles(roles: Role[]): Promise<void> {
@@ -51,5 +53,9 @@ export class DrizzleSeedRepository implements SeedRepository, OnModuleInit {
 
   async populateSettings(settings: Setting[]): Promise<void> {
     await this.db.insert(schema.setting).values(settings).onConflictDoNothing();
+  }
+
+  async populateSettingData(settingDataList: SettingData[]): Promise<void> {
+    await this.db.insert(schema.settingData).values(settingDataList).onConflictDoNothing();
   }
 }

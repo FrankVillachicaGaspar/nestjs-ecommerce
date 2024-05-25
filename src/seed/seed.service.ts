@@ -11,6 +11,7 @@ import constantsUtils from 'src/common/utils/constants.utils';
 import { generateProducts } from './mock/product.mock';
 import { DrizzleSeedRepository } from './repositories/drizzle-seed.repository';
 import { settingDataMock } from './mock/setting.mock';
+import { settingDataDataMock } from './mock/setting-data.mock';
 
 @Injectable()
 export class SeedService {
@@ -41,6 +42,7 @@ export class SeedService {
       await this.seedRepository.populateCategories(categories);
       await this.seedRepository.populateProducts(products);
       await this.seedRepository.populateSettings(settingDataMock);
+      await this.seedRepository.populateSettingData(settingDataDataMock);
 
       return { message: 'seed executed successfully' };
     } catch (error) {
