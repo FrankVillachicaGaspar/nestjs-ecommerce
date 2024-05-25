@@ -3,6 +3,7 @@ import { Role } from './role.interface';
 import { Product } from 'src/product/interfaces/product.interface';
 import { User } from 'src/user/interfaces/user.interface';
 import { Setting } from 'src/setting/interfaces/setting.interfaces';
+import { SettingData } from 'src/setting-data/interfaces/setting-data.interface';
 
 export interface SeedRepository {
   cleanDatabaseRecords(): Promise<void>;
@@ -16,4 +17,6 @@ export interface SeedRepository {
   populateProducts(products: Product[]): Promise<void>;
 
   populateSettings(settings: Setting[]): Promise<void>;
+
+  populateSettingData(settingDataList: SettingData[]): Promise<void>;
 }
