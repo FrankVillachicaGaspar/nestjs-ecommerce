@@ -53,7 +53,8 @@ export class SettingDataService {
     id: number,
     updateSettingDataDto: UpdateSettingDataDto,
   ): Promise<GetSettingDataDto> {
-    await this.settingRepository.getById(updateSettingDataDto.settingId);
+    if (updateSettingDataDto.settingId)
+      await this.settingRepository.getById(updateSettingDataDto.settingId);
 
     const settingData = await this.settingDataRepository.update(
       id,

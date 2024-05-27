@@ -1,10 +1,11 @@
 import { IsNotEmpty, IsNumber, IsPositive, IsString, MaxLength, Min, MinLength } from "class-validator";
+import { NoSpaces } from "src/common/validations/no-spaces.validation";
 
 export class CreateSettingDataDto {
   @IsNotEmpty()
   @IsString()
   @MinLength(3)
-  @MaxLength(20)
+  @NoSpaces()
   code: string;
 
   @IsNotEmpty()

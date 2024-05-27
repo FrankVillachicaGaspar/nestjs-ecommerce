@@ -8,12 +8,13 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
+import { NoSpaces } from 'src/common/validations/no-spaces.validation';
 
 export class UpdateSettingDataDto {
   @IsString()
   @MinLength(3)
-  @MaxLength(20)
   @IsOptional()
+  @NoSpaces()
   code: string;
 
   @IsString()
