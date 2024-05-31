@@ -11,13 +11,13 @@ export class CreateSettingDataDto {
   @IsNotEmpty()
   @IsString()
   @MinLength(5)
-  @MaxLength(50)
+  @MaxLength(100)
   desc: string;
 
   @IsNotEmpty()
   @IsString()
   @MinLength(1)
-  @MaxLength(20)
+  @MaxLength(100)
   value: string;
 
   @IsNotEmpty()
