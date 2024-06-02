@@ -65,12 +65,13 @@ export default class DrizzleUserRepository
 
       const pagination = calculatePaginationData(totalItems, limit, page);
 
-      const userListDb = await this.db
-        .select()
-        .from(schema.user)
-        .limit(limit)
-        .offset(calculateOffset(limit, page))
-        .all();
+      const userListDb: User[] = await this.db.query.user.findMany({
+        with: {
+          role: true,
+        },
+        limit,
+        offset: calculateOffset(limit, page),
+      });
 
       return {
         data: userListDb,
@@ -83,11 +84,10 @@ export default class DrizzleUserRepository
 
   async findById(id: number): Promise<User> {
     try {
-      const userDb: User = await this.db
-        .select()
-        .from(schema.user)
-        .where(eq(schema.user.id, id))
-        .get();
+      const userDb: User = await this.db.query.user.findFirst({
+        where: (user, { eq }) => eq(user.id, id),
+        with: { role: true },
+      });
 
       if (!userDb) throw new NotFoundException(`User with id ${id} not found.`);
 

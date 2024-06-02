@@ -1,3 +1,5 @@
+import { Role } from 'src/role/interfaces/role.interface';
+
 export interface User {
   id: number;
   username: string;
@@ -10,4 +12,5 @@ export interface User {
   modifiedAt?: string;
   deletedAt?: string;
   roleId: number;
+  role?: Role;
 }

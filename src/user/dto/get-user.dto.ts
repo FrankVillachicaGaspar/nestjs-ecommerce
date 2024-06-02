@@ -1,4 +1,5 @@
-import { Expose, Transform } from 'class-transformer';
+import { Expose, Transform, Type } from 'class-transformer';
+import { GetShortRoleDto } from 'src/role/dto/get-short-role.dto';
 
 export class GetUserDto {
   @Expose()
@@ -25,4 +26,8 @@ export class GetUserDto {
   @Expose()
   @Transform(({ value }) => value ?? '')
   modifiedAt?: string;
+
+  @Expose()
+  @Type(() => GetShortRoleDto)
+  role: GetShortRoleDto;
 }

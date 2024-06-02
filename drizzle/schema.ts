@@ -22,6 +22,9 @@ export const role = sqliteTable(
     };
   },
 );
+export const roleRelations = relations(role, ({ many }) => ({
+  user: many(user),
+}));
 
 export const user = sqliteTable(
   'user',
@@ -36,8 +39,7 @@ export const user = sqliteTable(
     createdAt: text('created_at').notNull(),
     modifiedAt: text('modified_at'),
     deletedAt: text('deleted_at'),
-
-    roleId: integer('role_id').references(() => role.id),
+    roleId: integer('role_id'),
   },
   (table) => {
     return {
@@ -46,6 +48,10 @@ export const user = sqliteTable(
     };
   },
 );
+
+export const userRelations = relations(user, ({ one }) => ({
+  role: one(role, { fields: [user.roleId], references: [role.id] }),
+}));
 
 export const category = sqliteTable('category', {
   id: integer('id').primaryKey({ autoIncrement: true }),
