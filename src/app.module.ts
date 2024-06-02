@@ -10,6 +10,7 @@ import { SeedModule } from './seed/seed.module';
 import { ProductModule } from './product/product.module';
 import { SettingsModule } from './setting/setting.module';
 import { SettingDataModule } from './setting-data/setting-data.module';
+import { RoleModule } from './role/role.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { SettingDataModule } from './setting-data/setting-data.module';
     ProductModule,
     SettingsModule,
     SettingDataModule,
+    RoleModule,
   ],
 })
 export class AppModule {}
