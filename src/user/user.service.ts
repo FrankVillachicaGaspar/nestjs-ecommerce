@@ -6,6 +6,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import DrizzleUserRepository from './repositories/drizzle-user.repository';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { FindAllResponse } from 'src/common/interfaces/find-all-response.dto';
+import { encryptPassword } from 'src/common/utils/bcrypt.utils';
 
 @Injectable()
 export class UserService {
@@ -15,6 +16,11 @@ export class UserService {
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<GetUserDto> {
+    createUserDto = {
+      ...createUserDto,
+      password: encryptPassword(createUserDto.password),
+    };
+
     const user = await this.userRepository.create(createUserDto);
 
     return this.dtoConverter.plainToDto(GetUserDto, user);

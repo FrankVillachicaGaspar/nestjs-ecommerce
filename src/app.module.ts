@@ -11,6 +11,7 @@ import { ProductModule } from './product/product.module';
 import { SettingsModule } from './setting/setting.module';
 import { SettingDataModule } from './setting-data/setting-data.module';
 import { RoleModule } from './role/role.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -18,15 +19,16 @@ import { RoleModule } from './role/role.module';
       load: [EnvConfiguration],
       validationSchema: JoiValidationSchema,
     }),
+    DrizzleModule,
     CommonModule,
     UserModule,
     CategoryModule,
-    DrizzleModule,
     SeedModule,
     ProductModule,
     SettingsModule,
     SettingDataModule,
     RoleModule,
+    AuthModule,
   ],
 })
 export class AppModule {}

@@ -10,9 +10,13 @@ post {
   auth: none
 }
 
+headers {
+  Authorization: Bearer {{access_token}}
+}
+
 body:json {
   {
-    "name": "For delete",
+    "name": "For delete 3",
     "desc": "Esta categoría fue creada para eliminarse."
   }
 }

@@ -3,4 +3,5 @@ export const EnvConfiguration = () => ({
   tursoDatabaseUrl: process.env.TURSO_DATABASE_URL,
   tursoAuthToken: process.env.TURSO_AUTH_TOKEN,
   localDatabaseUrl: process.env.LOCAL_DATABASE_URL,
+  jwtSecret: process.env.JWT_SECRET
 });

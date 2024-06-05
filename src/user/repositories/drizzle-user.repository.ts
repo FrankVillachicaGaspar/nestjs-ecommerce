@@ -97,6 +97,24 @@ export default class DrizzleUserRepository
     }
   }
 
+  async findByEmailOrUsername(emailOrUsername: string): Promise<User> {
+    try {
+      const user: User = await this.db.query.user.findFirst({
+        where: (user, { or, eq }) =>
+          or(
+            eq(user.email, emailOrUsername),
+            eq(user.username, emailOrUsername),
+          ),
+      });
+
+      if (!user) throw new BadRequestException(`User not found`);
+
+      return user;
+    } catch (error) {
+      handleDrizzleErrors(error, 'user', this.logger);
+    }
+  }
+
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     try {
       await this.findById(id);
