@@ -52,9 +52,10 @@ export class DrizzleService implements OnModuleInit {
    * @returns BetterSQLite3Database | LibSQLDatabase
    */
   getClient(className: string) {
+    if (!this.db) throw new Error('database connection is missing');
+
     this.logger.log(`Local database is successfully connected in ${className}`);
 
-    if (!this.db) throw new Error('database connection is missing');
     return this.db;
   }
 }

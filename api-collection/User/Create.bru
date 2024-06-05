@@ -10,14 +10,18 @@ post {
   auth: none
 }
 
+headers {
+  Authorization: Bearer {{access_token}}
+}
+
 body:json {
   {
-    "username": "usuarioprueba5",
-    "email": "usuarioprueba5@gmail.com",
+    "username": "usuarioprueba",
+    "email": "usuarioprueba@gmail.com",
     "password": "Anticuchito$300",
     "firstName": "Luis",
     "lastName": "Cabrera",
-    "phoneNumber": "+51 990123569",
-    "roleId": 2
+    "phoneNumber": "+51 990123512",
+    "roleId": 3
   }
 }

@@ -9,6 +9,8 @@ export interface UserRepositoryAdapter {
 
   findById(id: number): Promise<User>;
 
+  findByEmailOrUsername(emailOrUsername: string): Promise<User>;
+
   findAll(
     paginationQueryDto: PaginationQueryDto,
   ): Promise<FindAllResponse<User[]>>;

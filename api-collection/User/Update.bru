@@ -5,14 +5,17 @@ meta {
 }
 
 patch {
-  url: {{API_URL}}/user/33
+  url: {{API_URL}}/user/37
   body: json
   auth: none
 }
 
+headers {
+  Authorization: Bearer {{access_token}}
+}
+
 body:json {
   {
-    "firstName": "Arnold",
-    "lastName": "Tavara"
+    "roleId": 3
   }
 }

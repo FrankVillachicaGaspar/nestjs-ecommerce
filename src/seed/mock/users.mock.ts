@@ -1,15 +1,28 @@
 import { User } from 'src/user/interfaces/user.interface';
 import { faker } from '@faker-js/faker';
+import { encryptPassword } from 'src/common/utils/bcrypt.utils';
+
+const masterUser: User = {
+  id: 1,
+  username: 'master',
+  email: 'master@cmg.com',
+  password: encryptPassword('master123'),
+  firstName: 'master',
+  lastName: 'master',
+  phoneNumber: '+51 998989898',
+  roleId: 1,
+  createdAt: new Date().toISOString(),
+};
 
 const adminUser: User = {
-  id: 1,
+  id: 2,
   username: 'admin',
   email: 'admin@cmg.com',
-  password: 'admin123',
+  password: encryptPassword('admin123'),
   firstName: 'admin',
   lastName: 'admin',
   phoneNumber: '+51 956532235',
-  roleId: 1,
+  roleId: 2,
   createdAt: new Date().toISOString(),
 };
 
@@ -31,7 +44,7 @@ export const generateUsers = (quantity: number): User[] => {
       firstName: faker.person.firstName(),
       lastName: faker.person.lastName(),
       phoneNumber: generatePhoneNumber(),
-      roleId: 2,
+      roleId: 3,
       createdAt: faker.date.anytime().toISOString(),
     };
 
@@ -44,6 +57,7 @@ export const generateUsers = (quantity: number): User[] => {
     } else userList.push(user);
   }
   userList.unshift({ id: userList.length, ...adminUser });
+  userList.unshift({ id: userList.length, ...masterUser });
   return userList;
 };
 

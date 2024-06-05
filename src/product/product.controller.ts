@@ -13,11 +13,14 @@ import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { Role } from 'src/auth/constants/roles.constants';
 
 @Controller('product')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
+  @Roles(Role.ADMIN, Role.MASTER)
   @Post()
   create(@Body() createProductDto: CreateProductDto) {
     return this.productService.create(createProductDto);
@@ -33,6 +36,7 @@ export class ProductController {
     return this.productService.findOne(id);
   }
 
+  @Roles(Role.ADMIN, Role.MASTER)
   @Patch(':id')
   update(
     @Param('id', new ParseIntPipe()) id: number,
@@ -41,6 +45,7 @@ export class ProductController {
     return this.productService.update(id, updateProductDto);
   }
 
+  @Roles(Role.ADMIN, Role.MASTER)
   @Delete(':id')
   remove(@Param('id', new ParseIntPipe()) id: number) {
     return this.productService.remove(id);
